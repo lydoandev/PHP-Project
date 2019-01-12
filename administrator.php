@@ -1,6 +1,6 @@
 <?php 
 	session_start();
-	include "connectMySQL.php";
+	include "function.php";
 
 	if (!isset($_SESSION['role']) || $_SESSION['role'] !="admin") {
 		header('Location: home.php');
@@ -9,18 +9,16 @@
 	$_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
 
 	if (isset($_GET["username"])) {
-		$sql = "DELETE FROM users WHERE username = '" . $_GET["username"] . "'";
+		$sql = "UPDATE users SET delete_at = CURDATE(), is_active = 0 WHERE username = '" . $_GET["username"] . "'";
 		if ($connect->query($sql)) {
 			echo "<script>
 			 alert('Xóa Thành Công Tài Khoản');
 			 window.location.replace('./administrator.php');
 			 </script>";
-		} else {
-			echo "<script>
-			 alert('Tài khoản đã có đơn hàng nên không thể xóa');
+		}else echo "<script>
+			 alert('Xóa không Thành Công Tài Khoản');
 			 window.location.replace('./administrator.php');
 			 </script>";
-		}
 	}
 
 	$readonly = "";

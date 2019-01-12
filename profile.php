@@ -1,6 +1,6 @@
 <?php 
 	session_start();
-	include "connectMySQL.php";
+	include "function.php";
 	$user = new user();
 	$info = $user->showInfo($connect, $_SESSION['username']);
 

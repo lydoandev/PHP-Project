@@ -79,7 +79,7 @@
 					$avatar_url = 'Image/acount.png';
 				}
 				$hashed_password = password_hash($password, PASSWORD_DEFAULT);
-				$sql = "INSERT INTO users
+				$sql = "INSERT INTO users(username,password,avatar_url,first_name,last_name,birthday,gender,email,address,phone,creation_date,u_role,last_access,is_active)
 						VALUES ('$username', '$hashed_password', '$avatar_url', '$first_name', '$last_name', '$birthday', '$gender', '$email', '$address', '$phone', NOW(),'$u_role', NOW(), 1);";
 				if ($this->check_username($connect, $username)) {
 					if ($this->check_email($connect, $email)) {
@@ -218,7 +218,7 @@
 	{
 
 		function showCategoryOption($connect, $selected){
-			$sql = "SELECT * FROM categories";
+			$sql = "SELECT * FROM categories WHERE delete_at == ''";
 			$result = $connect->query($sql);
 			if ($result->num_rows > 0) {
 			while($row = $result->fetch_assoc()) {
@@ -231,7 +231,7 @@
 		}
 
 		function showCategorya($connect){
-			$sql = "SELECT * FROM categories";
+			$sql = "SELECT * FROM categories WHERE delete_at = ''";
 			$result = $connect->query($sql);
 			if ($result->num_rows > 0) {
 			while($row = $result->fetch_assoc()) {
@@ -254,7 +254,8 @@
 		function insert_products($connect, $prod_id, $prod_name, $material, $image, $price_in, $price_out, $quantity, $description, $cate_id, $views, $new_price, $date_start, $date_end){
 			if ($connect) {
 				if ($this->check_prod_id($connect, $prod_id)) {
-					$sql1 = "INSERT INTO products VALUES ('$prod_id', '$prod_name', '$material', '$image', '$price_in', '$price_out', NOW(), '$quantity', '$description', '$cate_id', '$views',1)";
+					$sql1 = "INSERT INTO products (prod_id, prod_name, material, image, price_in, price_out, date_add, quantity, description, cate_id, views, status)
+					VALUES ('$prod_id', '$prod_name', '$material', '$image', '$price_in', '$price_out', NOW(), '$quantity', '$description', '$cate_id', '$views',1)";
 					$sql2 = "INSERT INTO promotion VALUES ('$prod_id', '$new_price', '$date_start', '$date_end')";
 					if ($connect->query($sql1)) {
 						if ($connect->query($sql2)) {
@@ -332,7 +333,7 @@
 
 		function showProduct($connect, $prod_id){
 			if ($connect) {
-				$sql = "SELECT products.prod_id, prod_name, material, image, price_in, price_out, date_add, quantity, description, cate_name, views, status, new_price, date_start, date_end FROM products LEFT JOIN categories ON products.cate_id = categories.cate_id LEFT JOIN promotion ON products.prod_id = promotion.prod_id  WHERE products.prod_id = '$prod_id';";
+				$sql = "SELECT products.prod_id, prod_name, material, image, price_in, price_out, date_add, quantity, description, cate_name, views, status, products.delete_at, new_price, date_start, date_end FROM products LEFT JOIN categories ON products.cate_id = categories.cate_id LEFT JOIN promotion ON products.prod_id = promotion.prod_id  WHERE products.prod_id = '$prod_id' and products.delete_at IS NULL";
 				$result = $connect->query($sql);
 				if ($result->num_rows > 0) {
 					$row = $result->fetch_assoc();
@@ -344,13 +345,13 @@
 
 		function showProductHot($connect){
 			if ($connect) {
-				$sql = "SELECT * FROM products ORDER BY views DESC LIMIT 8";
+				$sql = "SELECT * FROM products WHERE delete_at IS NULL ORDER BY views DESC LIMIT 8";
 				$result = $connect->query($sql);
 				if ($result->num_rows > 0) {
 					while($row = $result->fetch_assoc()) {
-						$info = $this->showProduct($connect, $row['prod_id']);
-						$image = explode("|", $info['image']);
-						$this->showInfoProducthtml($row['prod_id'], $info['prod_name'], $image[0], $info['price_out'], $info['new_price']);
+							$info = $this->showProduct($connect, $row['prod_id']);
+							$image = explode("|", $info['image']);
+							$this->showInfoProducthtml($row['prod_id'], $info['prod_name'], $image[0], $info['price_out'], $info['new_price']);
 					}
 				}
 			}
@@ -358,7 +359,7 @@
 
 		function showProductHotSell($connect){
 			if ($connect) {
-				$sql = "SELECT prod_id, SUM(quantity) FROM ords_prods GROUP BY(prod_id) ORDER BY SUM(quantity) DESC LIMIT 8;";
+				$sql = "SELECT products.prod_id, SUM(ords_prods.quantity) FROM ords_prods, products WHERE products.prod_id = ords_prods.prod_id AND products.delete_at IS NULL GROUP BY(ords_prods.prod_id) ORDER BY SUM(ords_prods.quantity) DESC LIMIT 8;";
 				$result = $connect->query($sql);
 				if ($result->num_rows > 0) {
 					while($row = $result->fetch_assoc()) {
@@ -372,7 +373,7 @@
 
 		function showProductPromotion($connect){
 			if ($connect) {
-				$sql = "SELECT * FROM promotion ORDER BY new_price DESC LIMIT 8";
+				$sql = "SELECT * FROM promotion, products WHERE products.prod_id = promotion.prod_id AND products.delete_at IS NULL  ORDER BY new_price DESC LIMIT 8";
 				$result = $connect->query($sql);
 				if ($result->num_rows > 0) {
 					while($row = $result->fetch_assoc()) {
@@ -437,11 +438,6 @@
 		return $target_file;
 	}
 
-
-	
-
-	
-
 	function showAllUsers($connect){
 		if ($connect) {
 			$sql = "SELECT * FROM users";
@@ -464,6 +460,10 @@
 							    </thead>
 							    <tbody>";
 			    while($row = $result->fetch_assoc()) {
+			    	$show = "show";
+			    	if ($row['is_active'] == 0 & $row['delete_at'] != "") {
+			    		$show = "hidden";
+			    	}
 			    	if ($row['is_active'] == 0) {
 			    		$color = 'red';
 			    	}else $color = '#1ac6ff';
@@ -477,8 +477,8 @@
 				        <td>" . $row['is_active'] . "</td>
 				        <td>" . $row['last_access'] . "</td>
 				        <td class = 'text-center'>
-				        	<a href='administrator.php?viewUsername=" . $row['username'] . "'><i class = 'fa fa-eye' style='color: #3399ff;'></i></a> &nbsp;
-									<a href='administrator.php?username=" . $row['username'] . "'><i class = 'fa fa-trash-o' style='color: red;'></i></a>
+				        	<a href='administrator.php?viewUsername=" . $row['username'] . "'><i class = 'fa fa-eye' style='color: #3399ff;'></i></a>
+									<a class = '$show' href='administrator.php?username=" . $row['username'] . "'><i class = 'fa fa-trash-o' style='color: red;'></i></a>
 				        </td>
 				      </tr>
 			    	";
@@ -494,7 +494,7 @@
 
 	function showAllProduct($connect){
 		if ($connect) {
-			$sql = "SELECT products.prod_id, prod_name, material, image, price_in, price_out, date_add, quantity, description, cate_name, views, status, new_price, date_start, date_end FROM products LEFT JOIN categories ON products.cate_id = categories.cate_id LEFT JOIN promotion ON products.prod_id = promotion.prod_id;";
+			$sql = "SELECT products.prod_id, prod_name, material, image, price_in, price_out, date_add, quantity, description, cate_name, views, status, products.delete_at, new_price, date_start, date_end FROM products LEFT JOIN categories ON products.cate_id = categories.cate_id LEFT JOIN promotion ON products.prod_id = promotion.prod_id;";
 			$result = $connect->query($sql);
 			if ($result->num_rows > 0) {
 				echo "<table class='table table-bordered'>
@@ -512,8 +512,15 @@
 							    </thead>
 							    <tbody>";
 			    while($row = $result->fetch_assoc()) {
+			    	$show = "show";
+			    	if ($row['status'] == 0 & $row['delete_at'] != "") {
+			    		$show = "hidden";
+			    	}
+			    	if ($row['status'] == 0) {
+			    		$color = 'red';
+			    	}else $color = '#1ac6ff';
 			    	echo "
-			    		<tr>
+			    		<tr style='color: $color'>
 				        <td>" . $row['prod_id'] . "</td>
 				        <td>" . $row['prod_name']. "</td>
 				        <td>" . $row['material'] . "</td>
@@ -523,7 +530,7 @@
 				        <td>" . $row['status'] . "</td>
 				        <td class = 'text-center'>
 				        	<a href='stocker.php?viewProd_id=" . $row['prod_id'] . "'><i class = 'fa fa-pencil-square-o' style='color: #3399ff;'></i></a> 
-									<a href='stocker.php?prod_id=" . $row['prod_id'] . "'><i class = 'fa fa-trash-o' style='color: red;'></i></a>
+									<a class = '$show' href='stocker.php?prod_id=" . $row['prod_id'] . "'><i class = 'fa fa-trash-o' style='color: red;'></i></a>
 				        </td>
 				      </tr>
 			    	";
@@ -533,6 +540,67 @@
 			} else {
 			    echo "0 results";
 			}
+		}
+	}
+
+	function getOrderIDNotYetOrder($connect, $username){
+		if ($connect) {
+			$sql = "SELECT order_id FROM orders WHERE username = '$username' AND status = 0 LIMIT 1;";
+			$result=$connect->query($sql);
+			if ($result->num_rows > 0)) {
+				$row = $result->fetch_assoc();
+				return $row['order_id'];
+			}else return "";
+		}
+		return "";
+	}
+
+	function getQuantityProductInCart($connect, $order_id, $prod_id){
+		if ($connect) {
+			$sql = "SELECT quantity FROM orders WHERE order_id = '$order_id' AND prod_id = '$prod_id'";
+			$result=$connect->query($sql);
+			if ($result->num_rows > 0)) {
+				$row = $result->fetch_assoc();
+				return $row['quantity'];
+			}else return "";
+		}
+		return "";
+	}
+
+	function add_To_ords_prods($connect, $order_id, $prod_id, $input_quantity){
+		$url = $_SESSION['last_url'];
+		if ($connect) {
+			$qtt = getQuantityProductCart($connect, $order_id, $prod_id);
+			if ($qtt == "") {
+				$sql = "INSERT INTO ords_prods VALUES ('$order_id', '$prod_id', '$input_quantity')";
+				if ($connect->query($sql)) {
+					echo "<script>
+						 alert('Thêm vào giỏ hàng thành công');
+						 window.location.replace('../../$url');
+						</script>";
+				}
+			}else {
+				$input_quantity = $input_quantity + $qtt;
+				$sql = "UPDATE ords_prods SET quantity = '$input_quantity' WHERE order_id = '$order_id' AND prod_id = '$prod_id'";
+				if ($connect->query($sql)) {
+					echo "<script>
+						 alert('Thêm vào giỏ hàng thành công');
+						 window.location.replace('../../$url');
+						</script>";
+				}
+			}
+			
+		}
+	}
+
+	function addToCart($connect, $username, $prod_id, $quantity){
+		if ($connect) {
+			$order_id = getOrderIDNotYetOrder($connect, $username);
+			if ($order_id == "") {
+				$sql = "INSERT INTO orders(username, status) VALUES ('$username', 0)";
+				$order_id = getOrderIDNotYetOrder($connect, $username);
+				add_To_ords_prods($connect, $order_id, $prod_id, $quantity);
+			}else add_To_ords_prods($connect, $order_id, $prod_id, $quantity);
 		}
 	}
 

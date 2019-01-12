@@ -30,7 +30,8 @@ CREATE TABLE `users`(
 	`creation_date` DATETIME,
 	`u_role` VARCHAR(50) NOT NULL,
 	`last_access` DATE,
-	`is_active` BOOLEAN NOT NULL
+	`is_active` BOOLEAN NOT NULL,
+    `delete_at` date
 );
 
 CREATE TABLE employees(
@@ -50,7 +51,7 @@ CREATE TABLE shippers(
 );
 
 CREATE TABLE orders(
-	order_id VARCHAR(10) PRIMARY KEY,
+	order_id INT(11) AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50),
     emp_id VARCHAR(10),
     ship_id VARCHAR(10),
@@ -65,8 +66,11 @@ CREATE TABLE orders(
 
 CREATE TABLE categories(
 	cate_id VARCHAR(10) PRIMARY KEY,
-    cate_name VARCHAR(255)
+    cate_name VARCHAR(255),
+    delete_at date
 );
+
+SELECT order_id FROM orders WHERE username = '' AND status = 0;
 
 CREATE TABLE products(
 	prod_id VARCHAR(10) PRIMARY KEY,
@@ -81,6 +85,7 @@ CREATE TABLE products(
     cate_id VARCHAR(10),
     views int(11),
     status BOOLEAN,
+    delete_at date,
     FOREIGN KEY (cate_id) REFERENCES categories (cate_id)
 );
 
@@ -104,7 +109,7 @@ CREATE TABLE promotion(
 );
 
 CREATE TABLE ords_prods(
-    order_id VARCHAR(10),
+    order_id INT(11),
     prod_id VARCHAR(10),
     quantity int(11),
     FOREIGN KEY (order_id) REFERENCES orders (order_id),
@@ -112,7 +117,7 @@ CREATE TABLE ords_prods(
     PRIMARY KEY(order_id, prod_id)
 );
 
-INSERT INTO `users`
+INSERT INTO `users`(username,password,avatar_url,first_name,last_name,birthday,gender,email,address,phone,creation_date,u_role,last_access,is_active)
  VALUES ('administrator', '$2y$10$8Re1K6.OTJ5aPrbMLLFq/e31YVwFaQg8P1s6rfsb96mpqR5v0/Z.W','Image/acount.png',
 		 'Ly', 'Đoàn Thị', '1999-11-22', 'Female', 'lydoan.dev@gmail.com','101B Lê Hữu Trác','0348543343',NOW(), 'admin', NOW(), 1),
 		 ('stocker', '$2y$10$79ywhulHRpeIB5oPhq0/L.W./lnVt58ahiRzbEGdf0Mwcs2A4mu8C','Image/acount.png',
@@ -143,18 +148,18 @@ INSERT INTO `shippers`
         ('SP_03','Trần Văn Huy','Grap','0345124514');
  
  
- INSERT INTO `orders`
- VALUES ('OD_01','nguyenmy','EMP_01','SP_01','2019-01-11','2019-01-14','56-Nguyễn Văn Thoại-Đà Nẵng','1'),
-		 ('OD_02','trangtran','EMP_02','SP_02','2019-01-20','2019-01-24','43-Nguyễn Công Trứ-Hà Nội','1'),
-		 ('OD_03','phantrung','EMP_02','SP_02','2019-01-14','2019-01-18','102-Hùng Vương-Hồ Chí Minh','1');
+ INSERT INTO `orders`(username, emp_id, ship_id, order_date, ship_date, order_address, status)
+ VALUES ('nguyenmy','EMP_01','SP_01','2019-01-11','2019-01-14','56-Nguyễn Văn Thoại-Đà Nẵng','1'),
+		 ('trangtran','EMP_02','SP_02','2019-01-20','2019-01-24','43-Nguyễn Công Trứ-Hà Nội','1'),
+		 ('phantrung','EMP_02','SP_02','2019-01-14','2019-01-18','102-Hùng Vương-Hồ Chí Minh','1');
  
  
- INSERT INTO `categories`
+ INSERT INTO `categories`(cate_id, cate_name)
  VALUES ('CATE_01','Túi & Clutch'),
 		('CATE_02','Ví da'),
         ('CATE_03','Phụ kiện');
         
- INSERT INTO `products`
+ INSERT INTO `products`(prod_id, prod_name, material, image, price_in, price_out, date_add, quantity, description, cate_id, views, status)
  VALUES ('PD_01','CLUTCH HỘP','Da bò','Image/Product/CLUTCHHOP1.jpg|Image/Product/CLUTCHHOP2.jpg|Image/Product/CLUTCHHOP3.jpg|Image/Product/CLUTCHHOP4.jpg|Image/Product/CLUTCHHOP5.jpg'
 		,1010000,1020000,'2019-01-01',100,'Đây là phiển bản cải tiến của mẫu Clutch cũ, với phiên bản mới này bạn có thể đựng được rất nhiều vận dụng chỉ trong một chiếc túi da nhỏ gọn.
 		Đặc biệt: bên trong có ngăn có thể tách rời ra, sử dụng khi bạn muốn cần nhiều không gian để đồ hơn thì có thể tháo ra','CATE_01',11,1),
@@ -218,19 +223,14 @@ INSERT INTO `promotion`
         ('PD_09',605000,'2019-01-18','2019-01-21'),
         ('PD_10',1750000,'2019-01-18','2019-01-21');
 
-        
+UPDATE users SET delete_at = CURDATE() WHERE username = 'trangtran';      
         
 INSERT INTO `ords_prods`
- VALUES ('OD_01','PD_01',1),
-		('OD_02','PD_02',1),
-        ('OD_03','PD_03',1),
-        ('OD_01','PD_04',1),
-        ('OD_02','PD_05',1),
-        ('OD_03','PD_06',1),
-        ('OD_01','PD_07',1),
-        ('OD_02','PD_08',1),
-        ('OD_03','PD_09',1);
-        
-INSERT INTO products VALUES ('$prod_id', '$prod_name', '$material', '$image', '$price_in', '$price_out', NOW(), '$quantity', '$description', '$cate_id', '$views',1)
-        
-        
+ VALUES (1,'PD_01',1),
+		(2,'PD_02',1),
+        (3,'PD_03',1),
+        (1,'PD_04',1),
+        (2,'PD_05',1),
+        (3,'PD_06',1),
+        (1,'PD_07',1),
+        (2,'PD_08',1);    

@@ -1,7 +1,7 @@
 
 <?php
 	session_start();
-	include "connectMySQL.php";
+	include "function.php";
 
    ?>
 <!DOCTYPE html>

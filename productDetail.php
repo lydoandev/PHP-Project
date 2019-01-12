@@ -1,6 +1,6 @@
 <?php
 	session_start();
-	 include "connectMySQL.php"; 
+	 include "function.php"; 
 	 $info = array();
 	 
 	if (isset($_GET['prod_id'])) {

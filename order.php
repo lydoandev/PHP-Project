@@ -1,6 +1,6 @@
 <?php 
 	session_start();
-	include "connectMySQL.php";
+	include "function.php";
 	
 ?>
 <!DOCTYPE html>
@@ -71,9 +71,6 @@
               
             </div>
 
-            <div id="tabs-3" class="tab-pane fade">
-              
-            </div>
           </div>
  
 				</div>

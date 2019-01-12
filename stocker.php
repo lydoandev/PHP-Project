@@ -1,19 +1,14 @@
 <?php 
 	session_start();
-	include "connectMySQL.php";
+	include "function.php";
 	if (!isset($_SESSION['role']) || $_SESSION['role'] !="stocker") {
 		header('Location: home.php');
 	}
 	if (isset($_GET["prod_id"])) {
-		$sql = "DELETE FROM products WHERE prod_id = '" . $_GET["prod_id"] . "'";
+		$sql = "UPDATE products SET status = 0, delete_at = CURDATE() WHERE prod_id = '" . $_GET["prod_id"] . "'";
 		if ($connect->query($sql)) {
 			echo "<script>
-			 alert('Xóa Sản Phẩm Tài Khoản');
-			 window.location.replace('./stocker.php');
-			 </script>";
-		} else {
-			echo "<script>
-			 alert('Tài khoản đã có đơn hàng nên không thể xóa');
+			 alert('Xóa Sản Phẩm Thành Công');
 			 window.location.replace('./stocker.php');
 			 </script>";
 		}

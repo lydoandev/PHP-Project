@@ -1,6 +1,6 @@
 <?php 
 	session_start();
-	include "connectMySQL.php";
+	include "function.php";
 	$errConfirm = "";
 	$errOldPass = "";
 	if(isset($_POST['updatePass'])) {
