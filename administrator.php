@@ -6,6 +6,7 @@
 		header('Location: home.php');
 	}
 
+
 	$_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
 
 	if (isset($_GET["username"])) {
@@ -214,7 +215,13 @@
 	
 </body>
 <script>
-
+	function confirmDelete(url) {
+	    if (confirm("Bạn có chắc chắn muốn xóa không?")) {
+	        window.location.replace(url);
+	    } else {
+	        false;
+	    }       
+	}
 </script>
 
 </html>

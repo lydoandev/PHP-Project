@@ -23,7 +23,7 @@
 		$showInfo = "show";
 	}
 	if (isset($_POST['add'])) {
-		$image = chooseImage();
+		$image = chooseImage("Image/Product", "file");
 		$product = new product();
 		$product->insert_products($connect, $_POST['prod_id'], $_POST['prod_name'], $_POST['material'], $image, $_POST['price_in'], $_POST['price_out'], $_POST['quantity'], $_POST['description'], $_POST['cate_id'], $_POST['views'], $_POST['new_price'], $_POST['date_start'], $_POST['date_end']);
 	}
@@ -39,8 +39,8 @@
 
 	$_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
 	if (isset($_POST['update'])) {
-		$image = chooseImage();
-		if ($image == "avatars/") {
+		$image = chooseImage("Image/Product", "file");
+		if ($image == "Image/Product/") {
 			$image =$info['image'];
 			echo "Ly $image";
 		}
@@ -231,8 +231,13 @@
 	
 </body>
 <script>
-
-
+	function confirmDelete(url) {
+	    if (confirm("Bạn có chắc chắn muốn xóa không?")) {
+	        window.location.replace(url);
+	    } else {
+	        false;
+	    }       
+	}
 </script>
 
 </html>

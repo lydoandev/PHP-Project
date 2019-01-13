@@ -2,7 +2,7 @@
 <?php
 	session_start();
 	include "function.php";
-	$page = "home";
+	$page = "product";
 	if (isset($_GET['addProd_id'])) {
 		if (!isset($_SESSION['username'])) {
 			echo "
@@ -66,7 +66,7 @@
 					<div class="solugan">
 						<div class="box-product-head">
 							<span class="box-title">
-								SẢN PHẨM NỔI BẬT
+								VÍ DA
 							</span>
 							<span class="af-ter">
 								
@@ -74,8 +74,16 @@
 						</div>
 					</div>
 					<?php  
-						$prod = new product();
-						$prod->showProductHot($connect);
+						$sql = "SELECT * FROM products, categories WHERE products.cate_id = categories.cate_id AND categories.cate_name = 'Ví da' AND products.delete_at IS NULL LIMIT 8;";
+						$result = $connect->query($sql);
+						if ($result->num_rows > 0) {
+							while($row = $result->fetch_assoc()) {
+								$prod = new product();
+								$info = $prod->showProduct($connect, $row['prod_id']);
+								$image = explode("|", $info['image']);
+								$prod->showInfoProducthtml($row['prod_id'], $info['prod_name'], $image[0], $info['price_out'], $info['new_price']);
+							}
+						}
 					?>
 				</div>
 			</div>
@@ -85,7 +93,7 @@
 					<div class="solugan">
 						<div class="box-product-head">
 							<span class="box-title">
-								SẢN PHẨM BÁN CHẠY
+								TÚI & CLUTCH
 							</span>
 							<span class="af-ter">
 								
@@ -93,8 +101,16 @@
 						</div>
 					</div>
 					<?php  
-						$prod = new product();
-						$prod->showProductHotSell($connect);
+						$sql = "SELECT * FROM products, categories WHERE products.cate_id = categories.cate_id AND categories.cate_name = 'Túi & clutch' AND products.delete_at IS NULL LIMIT 8;";
+						$result = $connect->query($sql);
+						if ($result->num_rows > 0) {
+							while($row = $result->fetch_assoc()) {
+								$prod = new product();
+								$info = $prod->showProduct($connect, $row['prod_id']);
+								$image = explode("|", $info['image']);
+								$prod->showInfoProducthtml($row['prod_id'], $info['prod_name'], $image[0], $info['price_out'], $info['new_price']);
+							}
+						}
 					?>
 				</div>
 			</div>
@@ -104,7 +120,7 @@
 					<div class="solugan">
 						<div class="box-product-head">
 							<span class="box-title">
-								SẢN PHẨM SIÊU KHUYẾN MÃI
+								PHỤ KIỆN
 							</span>
 							<span class="af-ter">
 								
@@ -112,8 +128,16 @@
 						</div>
 					</div>
 					<?php  
-						$prod = new product();
-						$prod->showProductPromotion($connect);
+						$sql = "SELECT * FROM products, categories WHERE products.cate_id = categories.cate_id AND categories.cate_name = 'Phụ kiện' AND products.delete_at IS NULL LIMIT 8;";
+						$result = $connect->query($sql);
+						if ($result->num_rows > 0) {
+							while($row = $result->fetch_assoc()) {
+								$prod = new product();
+								$info = $prod->showProduct($connect, $row['prod_id']);
+								$image = explode("|", $info['image']);
+								$prod->showInfoProducthtml($row['prod_id'], $info['prod_name'], $image[0], $info['price_out'], $info['new_price']);
+							}
+						}
 					?>
 				</div>
 			</div>

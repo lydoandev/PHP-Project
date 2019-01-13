@@ -158,7 +158,7 @@
             </div>
             <div class="collapse navbar-collapse" id="myNavbar">
               <ul class="nav navbar-nav">
-                <li class="dropdown" >
+                <li class="dropdown "> 
                   <a href="#" id="category" class="dropdown-toggle" data-toggle="dropdown"><span class="fa fa-bars "></span>  DANH MỤC SẢN PHẨM</a>
                   <ul class="dropdown-menu text-capitalize" role="menu">
                     <?php
@@ -167,8 +167,10 @@
                     ?>
                   </ul>
                 </li>
-                <li><a href="#">TRANG CHỦ</span></a></li>
-                <li><a href="#">SẢN PHẨM </a></li>
+                <li class="<?php if (isset($page) && $page == 'home' ) {
+                  echo "active"; } ?>"><a href="home.php">TRANG CHỦ</span></a></li>
+                <li class="<?php if (isset($page) && $page == 'product' ) {
+                  echo "active"; } ?>"><a href="product.php">SẢN PHẨM </a></li>
                 <li><a href="#">LIÊN HỆ </span></a></li>
                 <li class="<?php echo $showSwitch; ?>"><a href="administrator.php"><i class="fa fa-hand-o-right"></i> ĐẾN ADMIN </span></a></li>
                 <li>

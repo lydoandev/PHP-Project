@@ -1,4 +1,12 @@
-   
+  .header-menu .navbar-nav>li.active>a,
+  .header-menu .navbar-nav>li.active>a:focus,
+  .header-menu .navbar-nav>li.active>a:hover {
+    border-top: none;
+    border-left: 1px solid #111;
+    border-right: none;
+    background: #c51a1d;
+    color: #fff;
+  }   
   .admin .text {
     overflow-y: scroll;
     height: 550px;

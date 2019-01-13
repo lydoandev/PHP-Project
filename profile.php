@@ -15,7 +15,8 @@
 	}
 
 	if(isset($_POST['update'])) {
-		$avatar_url = chooseImage();
+		echo $_POST['file'];
+		$avatar_url = chooseImage("avatars", "file");
 		$user = new user();
 		$user->updateInfo($connect, $_SESSION['username'], $avatar_url, $_POST['last_name'], $_POST['first_name'], $_POST['email'], $_POST['address'], $_POST['phone'], $_POST['gender'], $_POST['birthday']);
 	}
@@ -162,15 +163,11 @@
 
 		          <div class="tab-content">
 		            <div id="tabs-1" class="tab-pane active">
-		              
+		              <?php showOrdering($connect, $_SESSION['username']); ?>
 		            </div>
 
 		            <div id="tabs-2" class="tab-pane fade">
-		              
-		            </div>
-
-		            <div id="tabs-3" class="tab-pane fade">
-		              
+		              <?php showOrdered($connect, $_SESSION['username']); ?>
 		            </div>
 		          </div>
 	          </div>

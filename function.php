@@ -217,6 +217,15 @@
 	class product
 	{
 
+		function changeViews($connect, $prod_id){
+			if ($connect) {
+				$info = $this->showProduct($connect, $prod_id);
+				$views = $info['views'] + 1;
+				$sql = "UPDATE products SET views = '$views' WHERE prod_id = '$prod_id'";
+				$connect->query($sql);
+			}
+		}
+
 		function showCategoryOption($connect, $selected){
 			$sql = "SELECT * FROM categories WHERE delete_at IS NULL";
 			$result = $connect->query($sql);
@@ -333,7 +342,7 @@
 
 		function showProduct($connect, $prod_id){
 			if ($connect) {
-				$sql = "SELECT products.prod_id, prod_name, material, image, price_in, price_out, date_add, quantity, description, cate_name, views, status, products.delete_at, new_price, date_start, date_end FROM products LEFT JOIN categories ON products.cate_id = categories.cate_id LEFT JOIN promotion ON products.prod_id = promotion.prod_id  WHERE products.prod_id = '$prod_id' and products.delete_at IS NULL";
+				$sql = "SELECT products.prod_id, prod_name, material, image, price_in, price_out, date_add, quantity, description, cate_name, views, status, products.delete_at, new_price, date_start, date_end FROM products LEFT JOIN categories ON products.cate_id = categories.cate_id LEFT JOIN promotion ON products.prod_id = promotion.prod_id  WHERE products.prod_id = '$prod_id'";
 				$result = $connect->query($sql);
 				if ($result->num_rows > 0) {
 					$row = $result->fetch_assoc();
@@ -409,14 +418,14 @@
 		}
 	}
 
-	function chooseImage(){
-		$target_dir = "avatars/";
-		$target_file = $target_dir . basename($_FILES["file"]["name"]);
+	function chooseImage($target, $name){
+		$target_dir = $target."/";
+		$target_file = $target_dir . basename($_FILES["$name"]["name"]);
 		$uploadOk = 1;
 		$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 
 		// Check file size
-		if ($_FILES["file"]["size"] > 500000) {
+		if ($_FILES["$name"]["size"] > 500000) {
 			echo "<script>console.log('Sorry, your file is too large.')</script>";
 		    $uploadOk = 0;
 		}
@@ -429,7 +438,7 @@
 		if ($uploadOk == 0) {
 			echo "<script>console.log('Sorry, your file was not uploaded.')</script>";
 		} else{
-			if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
+			if (move_uploaded_file($_FILES["$name"]["tmp_name"], $target_file)) {
 				echo "<script>console.log('The file has been uploaded.')</script>";
 		    } else {
 		    	echo "<script>console.log('Sorry, there was an error uploading your file.')</script>";
@@ -467,6 +476,7 @@
 			    	if ($row['is_active'] == 0) {
 			    		$color = 'red';
 			    	}else $color = '#1ac6ff';
+			    	$deleteUrl = "administrator.php?username=" . $row['username'];
 			    	echo "
 			    		<tr style='color: $color'> <td>$stt</td>
 				        <td>" . $row['username'] . "</td>
@@ -478,7 +488,7 @@
 				        <td>" . $row['last_access'] . "</td>
 				        <td class = 'text-center'>
 				        	<a href='administrator.php?viewUsername=" . $row['username'] . "'><i class = 'fa fa-eye' style='color: #3399ff;'></i></a>
-									<a class = '$show' href='administrator.php?username=" . $row['username'] . "'><i class = 'fa fa-trash-o' style='color: red;'></i></a>
+									<a class = '$show' type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteUrl. "')\" ><i class = 'fa fa-trash-o' style='color: red;'></i></a>
 				        </td>
 				      </tr>
 			    	";
@@ -499,7 +509,7 @@
 			if ($result->num_rows > 0) {
 
 				
-				$total = totalPriceInCart($connect, $username, getOrderIDNotYetOrder($connect, $username));
+				$total = totalPriceInOrder($connect, getOrderIDNotYetOrder($connect, $username));
 				echo "<table class='table'>
 							    <thead style='background: #c299ff'>
 							      <tr class = 'text-center'>
@@ -522,6 +532,7 @@
 					 		$percent = 0;
 					 		$info['new_price'] = $info['price_out'];
 					 	}else $show = "show";
+					 $deleteurl = "cart.php?deleteProd_id=$prod_id&deleteOrder_id=".$row['order_id'];
 			    	echo "
 			    		
 		             	<form method = 'GET' action='' name = 'form'>
@@ -538,7 +549,7 @@
 				        <td>" . number_format($info['new_price']* $row['quantity']). "</td>
 				        <td class = 'text-center'>
 				        	<a href='cart.php?changeProd_id=" . $row['prod_id'] . "&changeOrder_id=".$row['order_id']. "&quantity=". "' type= 'button'><i class = 'fa fa-floppy-o' style='color: blue;'></i></a> &nbsp;
-							<a href='cart.php?deleteProd_id=" . $row['prod_id'] . "&deleteOrder_id=".$row['order_id']. "'><i class = 'fa fa-trash-o' style='color: red;'></i></a>
+							<a type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteurl. "')\"><i class = 'fa fa-trash-o' style='color: red;'></i></a>
 				        </td>
 				      </tr>
 				     </form>
@@ -561,18 +572,32 @@
 					}
 					
 			} else {
-			    echo "<h3>CHƯA CÓ SẢN PHẨM TRONG GIỎ HÀNG</h3>";
+			    echo "<div class = 'solugan'>
+			    <h3 style='color:red;'>CHƯA CÓ SẢN PHẨM TRONG GIỎ HÀNG</h3>
+			    </div>
+			    ";
 			}
 		}
 	}	
 
-	function totalPriceInCart($connect, $username, $order_id){
+	function checkProductHaspromotion(){
+
+	}
+
+	function totalPriceInOrder($connect, $order_id){
 		if ($connect) {
-			$sql = "SELECT SUM(products.price_out * ords_prods.quantity) AS total FROM products, ords_prods WHERE products.prod_id = ords_prods.prod_id AND order_id = $order_id";
+			$totalPrice = 0;
+			$sql = "SELECT * FROM  ords_prods WHERE order_id = $order_id";
 			$result = $connect->query($sql);
 			if ($result->num_rows > 0) {
-				$row = $result->fetch_assoc();
-				return $row['total'];
+				while ($row = $result->fetch_assoc()) {
+					$prod = new product();
+					$info = $prod->showproduct($connect, $row['prod_id']);
+					if ($info['new_price'] == "") {
+						$totalPrice += $info['price_out'];
+					}else $totalPrice += $info['new_price'];
+				}
+				return $totalPrice;
 			}else return "";
 		}
 		return "";
@@ -605,6 +630,7 @@
 			    	if ($row['status'] == 0) {
 			    		$color = 'red';
 			    	}else $color = '#1ac6ff';
+			    	$deleteUrl = "stocker.php?prod_id=" . $row['prod_id'];
 			    	echo "
 			    		<tr style='color: $color'>
 				        <td>" . $row['prod_id'] . "</td>
@@ -616,7 +642,7 @@
 				        <td>" . $row['status'] . "</td>
 				        <td class = 'text-center'>
 				        	<a href='stocker.php?viewProd_id=" . $row['prod_id'] . "'><i class = 'fa fa-pencil-square-o' style='color: #3399ff;'></i></a> 
-									<a class = '$show' href='stocker.php?prod_id=" . $row['prod_id'] . "'><i class = 'fa fa-trash-o' style='color: red;'></i></a>
+				        	<a class = '$show' type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteUrl. "')\" ><i class = 'fa fa-trash-o' style='color: red;'></i></a>
 				        </td>
 				      </tr>
 			    	";
@@ -709,6 +735,83 @@
 								</script>";
 						}
 					}
+			}
+		}
+	}
+
+	function showProductInOrder($connect, $order_id){
+		$sql = "SELECT * FROM ords_prods WHERE order_id = '$order_id'";
+		$result = $connect->query($sql);
+			if ($result->num_rows > 0) {
+				echo "<table class='table' style = 'margin-top: 100px;'>
+					 <tbody>";
+			    while($row = $result->fetch_assoc()) {
+			    	$prod = new product();
+			    	$info = $prod->showproduct($connect, $row['prod_id']);
+			    	$image = explode("|", $info['image']);
+			    	if ($info['new_price'] == "") {
+					 		$show = "hidden";
+					 		$info['new_price'] = $info['price_out'];
+					 	}else $show = "show";
+			    	echo "
+			    		
+			    		<tr>
+				        <td> <img src='$image[0]' width = '150px'>". $info['prod_name'] . "</td>
+				        <td> <s class = '$show'>" . number_format($info['price_out'])." đ</s>". number_format($info['new_price']). "đ</td>
+				        <td>". $row['quantity'] . "</td>
+				        <td>" . number_format($info['new_price']* $row['quantity']). "</td>
+				      </tr>
+			    	";
+			    }
+			    echo "</tbody>
+						</table>";
+				
+			}
+	}
+
+	function showOrdered($connect, $username){
+		if ($connect) {
+			$sql = "SELECT order_id FROM orders WHERE username = '$username' AND status = 1 AND ship_date < NOW()";
+			$result = $connect->query($sql);
+			if ($result->num_rows > 0) {
+				while($row = $result->fetch_assoc()) {
+					showProductInOrder($connect, $row['order_id']);
+
+					$total = totalPriceInOrder($connect, $order_id);
+					echo "
+					<div class= 'col-xs-6'>
+					</div>
+					<div class= 'col-xs-3' style= 'color: red'>
+						Ngày Giao: ".$row['ship_date']. "
+					</div>
+					<div class= 'col-xs-3'>
+						TỔNG TIỀN: ".number_format($total)."
+					</div>
+				";
+				}
+			}
+		}
+	}
+
+	function showOrdering($connect, $username){
+		if ($connect) {
+			$sql = "SELECT * FROM orders WHERE username = '$username' AND status = 1 AND ship_date > NOW()";
+			$result = $connect->query($sql);
+			if ($result->num_rows > 0) {
+				while($row = $result->fetch_assoc()) {
+					showProductInOrder($connect, $row['order_id']);
+					$total = totalPriceInOrder($connect, $row['order_id']);
+					echo "
+						<div class= 'col-xs-6'>
+						</div>
+						<div class= 'col-xs-3' style= 'color: red'>
+							Ngày Giao: ".$row['ship_date']. "
+						</div>
+						<div class= 'col-xs-3'>
+							TỔNG TIỀN: ".number_format($total)."
+						</div>
+					";
+				}
 			}
 		}
 	}

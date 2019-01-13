@@ -6,7 +6,9 @@
 	if (isset($_GET['prod_id'])) {
 	 	$show = "hidden";
 	 	$prod = new product();
+	 	$prod->changeViews($connect, $_GET['prod_id']);
 	 	$info = $prod->showProduct($connect, $_GET['prod_id']);
+	 	$cate_name = $info['cate_name'];
 	 	$image = explode("|", $info['image']);
 	 	if ($info['new_price'] == "") {
 	 		$show = "hidden";
@@ -49,97 +51,141 @@
 
 	<div class="content">
 		<div class="container">
-		<div class="productDetail" style="margin: 50px 0px 50px 0px;">
-			<form method="POST" action="">
-				<div class="row">
-					<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 image">
-						<div class="imageMain">
-							<img src="<?php echo $image[0] ?>" width="100%">
-						</div>
-					</div>
-					<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 detail">
-						<div class="row">
-						<p class="prod_name"><?php echo $info['prod_name']; ?></p>
-						<div class="col-xs-6 float-left">
-							Mã Hàng:
-						</div>
-						<div class="col-xs-6 float-right">
-							<b><?php echo $info['prod_id']; ?></b>
-						</div>
-						<hr>
-						<div class="col-xs-6 float-left">
-							Nhóm Sản Phẩm:
-						</div>
-						<div class="col-xs-6 float-right">
-							<b><?php echo $info['cate_name']; ?></b>
-						</div>
-						<hr>
-						<div class="col-xs-6 float-left">
-							Chất liệu:
-						</div>
-						<div class="col-xs-6 float-right">
-							<b><?php echo $info['material']; ?></b>
-						</div>
-						<hr>
-						<div class="col-xs-6 float-left">
-							Số Lượt Xem:
-						</div>
-						<div class="col-xs-6 float-right">
-							<b><?php echo $info['views']; ?></b>
-						</div>
-						<hr>
-						<div class="col-xs-12">
-							<?php echo $info['description']; ?>
-						</div>
-						<hr>
-						<div class="row" style="font-size: 20px;">
-							<div class="col-xs-3">
-								&nbsp; Giá bán:
-							</div>
-							<div class="col-xs-3">
-								<?php echo number_format($info['new_price']); ?> đ
-							</div>
-							<div class="col-xs-3">
-								<s  class="<?php echo $show; ?>" style="color: red;"><?php echo number_format($info['price_out']); ?> đ</s>
-							</div>
-							<div class="col-xs-2">
-								<span style="background: #c51a1d;" class="<?php echo $show; ?>"><i class="fa fa-sort-amount-desc"></i><?php echo $percent; ?>%</span>
+			<div class="productDetail" style="margin: 50px 0px 50px 0px;">
+				<form method="POST" action="">
+					<div class="row">
+						<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 image">
+							<div class="imageMain">
+								<img src="<?php echo $image[0] ?>" width="100%">
 							</div>
 						</div>
+						<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 detail">
+							<div class="row">
+							<p class="prod_name"><?php echo $info['prod_name']; ?></p>
+							<div class="col-xs-6 float-left">
+								Mã Hàng:
+							</div>
+							<div class="col-xs-6 float-right">
+								<b><?php echo $info['prod_id']; ?></b>
+							</div>
 							<hr>
-							<div class="input-quantity row">
-	             <div class='col-sm-2'>
-	             	&nbsp; Số lượng: 
-	             </div>
-	             <div class='col-sm-1'>
-	             	<button type="button" class="btn minus" onclick="minusProductQuantity()">-</button>
-	             </div>
-	             <div class='col-sm-2'>
-	             	<input id="quantity" type="text" name="quantity" value="1" class="form-control" onchange="updateQuantity(this.value)">
-	             </div>
-	             <div class='col-sm-1'>
-	             	<button type="button" class="btn plus" onclick="plusProductQuantity()">+</button> 
-	             </div>
-	             <div class='col-sm-6'>
-	             	Còn <?php echo  $info['quantity']?> sản phẩm trong kho
-	             </div>
-		           </div>
-		           <hr>
-		           <div class="col-sm-3">
-		           </div>
-		           <div class="col-sm-3">
-		             <button class="btn btn-info text-uppercase" name = "addCart">Thêm vào giỏ</button>
-		           </div>
-		           <div class="col-sm-3">
-		             <button class="btn btn-info text-uppercase" name = "order">Mua ngay</button>
-		           </div>
+							<div class="col-xs-6 float-left">
+								Nhóm Sản Phẩm:
+							</div>
+							<div class="col-xs-6 float-right">
+								<b><?php echo $info['cate_name']; ?></b>
+							</div>
+							<hr>
+							<div class="col-xs-6 float-left">
+								Chất liệu:
+							</div>
+							<div class="col-xs-6 float-right">
+								<b><?php echo $info['material']; ?></b>
+							</div>
+							<hr>
+							<div class="col-xs-6 float-left">
+								Số Lượt Xem:
+							</div>
+							<div class="col-xs-6 float-right">
+								<b><?php echo $info['views']; ?></b>
+							</div>
+							<hr>
+							<div class="col-xs-12">
+								<?php echo $info['description']; ?>
+							</div>
+							<hr>
+							<div class="row" style="font-size: 20px;">
+								<div class="col-xs-3">
+									&nbsp; Giá bán:
+								</div>
+								<div class="col-xs-3">
+									<?php echo number_format($info['new_price']); ?> đ
+								</div>
+								<div class="col-xs-3">
+									<s  class="<?php echo $show; ?>" style="color: red;"><?php echo number_format($info['price_out']); ?> đ</s>
+								</div>
+								<div class="col-xs-2">
+									<span style="background: #c51a1d;" class="<?php echo $show; ?>"><i class="fa fa-sort-amount-desc"></i><?php echo $percent; ?>%</span>
+								</div>
+							</div>
+								<hr>
+								<div class="input-quantity row">
+		             <div class='col-sm-2'>
+		             	&nbsp; Số lượng: 
+		             </div>
+		             <div class='col-sm-1'>
+		             	<button type="button" class="btn minus" onclick="minusProductQuantity()">-</button>
+		             </div>
+		             <div class='col-sm-2'>
+		             	<input id="quantity" type="text" name="quantity" value="1" class="form-control" onchange="updateQuantity(this.value)">
+		             </div>
+		             <div class='col-sm-1'>
+		             	<button type="button" class="btn plus" onclick="plusProductQuantity()">+</button> 
+		             </div>
+		             <div class='col-sm-6'>
+		             	Còn <?php echo  $info['quantity']?> sản phẩm trong kho
+		             </div>
+			           </div>
+			           <hr>
+			           <div class="col-sm-3">
+			           </div>
+			           <div class="col-sm-3">
+			             <button class="btn btn-info text-uppercase" name = "addCart">Thêm vào giỏ</button>
+			           </div>
+			           <div class="col-sm-3">
+			             <button class="btn btn-info text-uppercase" name = "order">Mua ngay</button>
+			           </div>
+							</div>
 						</div>
 					</div>
+				</form>
+				
+			</div>
+			<div class="productHot">
+				<div class="row">
+					<div class="solugan">
+						<div class="box-product-head">
+							<span class="box-title text-uppercase">
+								SẢN PHẨM CÙNG NHÓM <?php echo $info['cate_name']; ?>
+							</span>
+							<span class="af-ter">
+								
+							</span>
+						</div>
+					</div>
+					<?php  
+						$sql = "SELECT * FROM products, categories WHERE products.cate_id = categories.cate_id AND categories.cate_name = '$cate_name' AND products.delete_at IS NULL LIMIT 8;";
+						$result = $connect->query($sql);
+						if ($result->num_rows > 0) {
+							while($row = $result->fetch_assoc()) {
+								$prod = new product();
+								$info = $prod->showProduct($connect, $row['prod_id']);
+								$image = explode("|", $info['image']);
+								$prod->showInfoProducthtml($row['prod_id'], $info['prod_name'], $image[0], $info['price_out'], $info['new_price']);
+							}
+						}
+					?>
 				</div>
-			</form>
-			
+			</div>
+			<div class="productPromotion">
+				<div class="row">
+					<div class="solugan">
+						<div class="box-product-head">
+							<span class="box-title text-uppercase">
+								sản phẩm bạn có thể quan tâm
+							</span>
+							<span class="af-ter">
+								
+							</span>
+						</div>
+					</div>
+					<?php  
+						$prod = new product();
+						$prod->showProductPromotion($connect);
+					?>
+				</div>
+			</div>
 		</div>
-	</div>
 	</div>
 	
 	<?php include "footer.php" ?>

@@ -30,6 +30,12 @@
 	 ?>
 	<div class="content">
 		<div class="container" style="height: 700px; margin-top: 320px;">
+			<div class="solugan">
+				<h3 class="text-center"><span><i class="fa fa-shopping-cart fa-2x"></i></span> GIỎ HÀNG CỦA BẠN </h3>
+			</div>
+			
+			<br>
+			<br>
 			<?php showCart($connect, $_SESSION['username']); ?>
 		</div>
 	</div>
@@ -37,7 +43,14 @@
 	<?php include "footer.php" ?>
 </body>
 <script>
-	//var quantity = 1;
+
+	function confirmDelete(url) {
+	    if (confirm("Bạn có chắc chắn muốn xóa không?")) {
+	        window.location.replace(url);
+	    } else {
+	        false;
+	    }       
+	}
 	function plusProductQuantity(input) {
 	   var quantity = input.value;
 	   quantity++;
