@@ -6,6 +6,9 @@
 	 	$sql = "DELETE FROM ords_prods WHERE order_id = '".$_GET['deleteOrder_id']."' AND prod_id = '". $_GET['deleteProd_id']."'";
 	 	$connect->query($sql);
 	 }
+	 if (isset($_GET['changeProd_id'])) {
+	 	$sql = "UPDATE ords_prods SET quantity = ";
+	 }
 ?>
 <!DOCTYPE html>
 <html>
@@ -38,14 +41,14 @@
 	function plusProductQuantity(input) {
 	   var quantity = input.value;
 	   quantity++;
-	   document.getElementById(input.name).value = quantity;
+	   document.getElementById(input.id).value = quantity;
 	}
 
 	function minusProductQuantity(input) {
 	  var quantity = input.value;
 	  if (quantity >= 1) {
 		  quantity--;
-		  document.getElementById(input.name).value = quantity;
+		  document.getElementById(input.id).value = quantity;
   	}
 	}
 
