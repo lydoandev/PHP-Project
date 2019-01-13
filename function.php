@@ -89,7 +89,7 @@
 								$_SESSION['avatar_url'] = 'Image/acount.png';
 								echo "<script>
 								 alert('Chào mừng $username đến với LEONARDO Shop');
-								 window.location.replace('../../$url');
+								 window.location.replace('..$url');
 								 </script>";
 							}
 							
@@ -152,7 +152,7 @@
 						} else 
 							echo "<script>
 							 alert('Chào Mừng $test Đến Với Trang Mua Sắm LENARDO');
-							 window.location.replace('../../$url');
+							 window.location.replace('..$url');
 							</script>";
 					} else {
 						echo "<script>
@@ -218,7 +218,7 @@
 	{
 
 		function showCategoryOption($connect, $selected){
-			$sql = "SELECT * FROM categories WHERE delete_at == ''";
+			$sql = "SELECT * FROM categories WHERE delete_at IS NULL";
 			$result = $connect->query($sql);
 			if ($result->num_rows > 0) {
 			while($row = $result->fetch_assoc()) {
@@ -231,7 +231,7 @@
 		}
 
 		function showCategorya($connect){
-			$sql = "SELECT * FROM categories WHERE delete_at = ''";
+			$sql = "SELECT * FROM categories WHERE delete_at IS NULL";
 			$result = $connect->query($sql);
 			if ($result->num_rows > 0) {
 			while($row = $result->fetch_assoc()) {
@@ -278,7 +278,7 @@
 					if ($connect->query($sql2)) {
 					echo "<script>
 					 	alert('Cập Nhật Sản Phẩm Thành Công');
-					 	window.location.replace('../../$url');
+					 	window.location.replace('..$url');
 					 </script>";
 					}else echo "<script> alert('Đã xảy ra lỗi');</script>";
 				}else echo "<script> alert('Đã xảy ra lỗi');</script>";
@@ -308,7 +308,7 @@
 						</div>
 						<div class='product-control text-center'>
 							<button class='btn'>
-								<a href='cart.php?prod_id=" . $prod_id . "'><i class = 'fa fa-cart-plus fa-lg' style='color: #FFF;'></i> Giỏ hàng
+								<a href='home.php?addProd_id=" . $prod_id . "'><i class = 'fa fa-cart-plus fa-lg' style='color: #FFF;'></i> Giỏ hàng
 							</button>
 							<button class='btn'>
 								<a href='productDetail.php?prod_id=" . $prod_id . "'><i class = 'fa fa-eye' style='color: #FFF;'></i></a>
@@ -490,7 +490,87 @@
 			    echo "0 results";
 			}
 		}
+	}
+
+	function showCart($connect, $username){
+		if ($connect) {
+			$sql = "SELECT orders.order_id, prod_id, quantity FROM ords_prods, orders WHERE ords_prods.order_id = orders.order_id AND username = '$username' AND orders.status = 0";
+			$result = $connect->query($sql);
+			if ($result->num_rows > 0) {
+
+				$total = totalPriceInCart($connect, $username, getOrderIDNotYetOrder($connect, $username));
+				echo "<table class='table'>
+							    <thead style='background: #c299ff'>
+							      <tr class = 'text-center'>
+							        <th><input type='checkbox'></th>
+							        <th>Sản Phẩm</th>
+							        <th>Đơn Giá</th>
+							        <th>Số Lượng</th>
+							        <th>Số Tiền</th>
+							        <th>Thao tác</th>
+							      </tr>
+							    </thead>
+							    <tbody>";
+			    while($row = $result->fetch_assoc()) {
+			    	$prod = new product();
+			    	$info = $prod->showproduct($connect, $row['prod_id']);
+			    	$image = explode("|", $info['image']);
+			    	if ($info['new_price'] == "") {
+					 		$show = "hidden";
+					 		$percent = 0;
+					 		$info['new_price'] = $info['price_out'];
+					 	}else $show = "show";
+			    	echo "
+			    		<tr>
+			    			<td> <input type='checkbox' value = '".$row['prod_id'] ."'> </td>
+				        <td> <img src='$image[0]' width = '150px'>". $info['prod_name'] . "</td>
+				        <td> <s class = '$show'>" . number_format($info['price_out'])." đ</s>". number_format($info['new_price']). "đ</td>
+				        <td>
+	             	<button type='button' class='btn minus' onclick='minusProductQuantity(". $row['prod_id'].")'>-</button>&nbsp;
+	             	<input id='".$row['prod_id']."' type='text' name='".$row['prod_id']."' style='width:50px;' value='".$row['quantity']."'>
+	             	<button type='button' class='btn plus' onclick='plusProductQuantity(". $row['prod_id'].")'>+</button> 
+	             	</td>
+				        <td>" . number_format($info['new_price']* $row['quantity']). "</td>
+				        <td class = 'text-center'>
+				        	<a href='cart.php?changeProd_id=" . $row['prod_id'] . "&changeOrder_id=".$row['order_id']. "'><i class = 'fa fa-floppy-o' style='color: blue;'></i></a> &nbsp;
+									<a href='cart.php?deleteProd_id=" . $row['prod_id'] . "&deleteOrder_id=".$row['order_id']. "'><i class = 'fa fa-trash-o' style='color: red;'></i></a>
+				        </td>
+				      </tr>
+			    	";
+			    }
+			    echo "</tbody>
+							  </table>";
+					if ($total=="") {
+						echo "<h3>CHƯA CÓ SẢN PHẨM TRONG GIỎ HÀNG</h3>";
+					}else{
+						echo "<div class='col-xs-6'>
+							 </div>
+							 <div class='col-xs-6'>
+							 	<form method='POST' action=''>
+							 		<b>TỔNG TIỀN: </b>". number_format($total)."
+
+							 	</form>
+							 	
+							 </div>";
+					}
+					
+			} else {
+			    echo "<h3>CHƯA CÓ SẢN PHẨM TRONG GIỎ HÀNG</h3>";
+			}
+		}
 	}	
+
+	function totalPriceInCart($connect, $username, $order_id){
+		if ($connect) {
+			$sql = "SELECT SUM(products.price_out * ords_prods.quantity) AS total FROM products, ords_prods WHERE products.prod_id = ords_prods.prod_id AND order_id = $order_id";
+			$result = $connect->query($sql);
+			if ($result->num_rows > 0) {
+				$row = $result->fetch_assoc();
+				return $row['total'];
+			}else return "";
+		}
+		return "";
+	}
 
 	function showAllProduct($connect){
 		if ($connect) {
@@ -547,7 +627,7 @@
 		if ($connect) {
 			$sql = "SELECT order_id FROM orders WHERE username = '$username' AND status = 0 LIMIT 1;";
 			$result=$connect->query($sql);
-			if ($result->num_rows > 0)) {
+			if ($result->num_rows > 0) {
 				$row = $result->fetch_assoc();
 				return $row['order_id'];
 			}else return "";
@@ -557,9 +637,9 @@
 
 	function getQuantityProductInCart($connect, $order_id, $prod_id){
 		if ($connect) {
-			$sql = "SELECT quantity FROM orders WHERE order_id = '$order_id' AND prod_id = '$prod_id'";
+			$sql = "SELECT quantity FROM ords_prods WHERE order_id = '$order_id' AND prod_id = '$prod_id'";
 			$result=$connect->query($sql);
-			if ($result->num_rows > 0)) {
+			if ($result->num_rows > 0) {
 				$row = $result->fetch_assoc();
 				return $row['quantity'];
 			}else return "";
@@ -567,40 +647,63 @@
 		return "";
 	}
 
-	function add_To_ords_prods($connect, $order_id, $prod_id, $input_quantity){
-		$url = $_SESSION['last_url'];
-		if ($connect) {
-			$qtt = getQuantityProductCart($connect, $order_id, $prod_id);
-			if ($qtt == "") {
-				$sql = "INSERT INTO ords_prods VALUES ('$order_id', '$prod_id', '$input_quantity')";
-				if ($connect->query($sql)) {
-					echo "<script>
-						 alert('Thêm vào giỏ hàng thành công');
-						 window.location.replace('../../$url');
-						</script>";
-				}
-			}else {
-				$input_quantity = $input_quantity + $qtt;
-				$sql = "UPDATE ords_prods SET quantity = '$input_quantity' WHERE order_id = '$order_id' AND prod_id = '$prod_id'";
-				if ($connect->query($sql)) {
-					echo "<script>
-						 alert('Thêm vào giỏ hàng thành công');
-						 window.location.replace('../../$url');
-						</script>";
-				}
-			}
-			
-		}
-	}
 
 	function addToCart($connect, $username, $prod_id, $quantity){
+		$url = $_SESSION['last_url'];
 		if ($connect) {
 			$order_id = getOrderIDNotYetOrder($connect, $username);
 			if ($order_id == "") {
 				$sql = "INSERT INTO orders(username, status) VALUES ('$username', 0)";
-				$order_id = getOrderIDNotYetOrder($connect, $username);
-				add_To_ords_prods($connect, $order_id, $prod_id, $quantity);
-			}else add_To_ords_prods($connect, $order_id, $prod_id, $quantity);
+				if ($connect->query($sql)) {
+					$order_id = getOrderIDNotYetOrder($connect, $username);
+					$prod = new product();
+					$info = $prod->showproduct($connect, $prod_id);
+					if ($quantity>$info['quantity']) {
+						echo "<script>
+							 alert('Số Lượng Sản Phẩm Không Đủ');
+							 window.location.replace('..$url');
+							</script>";
+					}else {
+						$sql = "INSERT INTO ords_prods VALUES ('$order_id', '$prod_id', '$quantity')";
+						if ($connect->query($sql)) {
+							echo "<script>
+								 alert('Thêm vào giỏ hàng thành công');
+								 window.location.replace('..$url');
+								</script>";
+						}else {
+							echo "<script>
+								 alert('Đã xảy ra lỗi');
+								 window.location.replace('..$url');
+								</script>";
+							}
+					}
+				}
+			}else {
+				$qtt = getQuantityProductInCart($connect, $order_id, $prod_id);
+					if ($qtt == "") {
+						$sql = "INSERT INTO ords_prods VALUES ('$order_id', '$prod_id', '$quantity')";
+						if ($connect->query($sql)) {
+							echo "<script>
+								 alert('Thêm vào giỏ hàng thành công');
+								 window.location.replace('..$url');
+								</script>";
+						}else {
+							echo "<script>
+								 alert('Đã xảy ra lỗi');
+								 window.location.replace('..$url');
+								</script>";
+						}
+					}else {
+						$quantity = $quantity + $qtt;
+						$sql = "UPDATE ords_prods SET quantity = '$quantity' WHERE order_id = '$order_id' AND prod_id = '$prod_id'";
+						if ($connect->query($sql)) {
+							echo "<script>
+								 alert('Thêm vào giỏ hàng thành công');
+								 window.location.replace('..$url');
+								</script>";
+						}
+					}
+			}
 		}
 	}
 

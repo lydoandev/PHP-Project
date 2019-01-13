@@ -115,13 +115,13 @@
                   </span> ĐĂNG NHẬP
                 </a>
               </li>
+              <li><a href="cart.php"><span><i class="fa fa-shopping-cart fa-2x <?php echo $showUsername;?>"></i></span></a></li>
               <li class="dropdown" class="<?php echo $showUsername;?>">
                   <a href="#" id="user" class="<?php echo $showUsername;?> ?>" data-toggle="dropdown">
                     <img class="img-circle" width="15" height="15" src="<?php echo $avatar ?>">
                     <?php echo $username; ?>
                   </a>
                   <ul class="dropdown-menu text-capitalize" role="menu">
-                    <li><a href="#"><span><i class="fa fa-shopping-cart"></i></span>Giỏ hàng</a></li>
                     <li><a href="profile.php"><span><i class="fa fa-user-circle-o"></i></span> Tài khoản của tôi</a></li>
                     <li><a href="logout.php"><span><i class="fa fa-sign-out"></i></span> Đăng xuất</a></li>
                   </ul>
@@ -249,7 +249,7 @@
             <div class="modal-body">
               <div class="col-md-12 home">
                 User Name:
-                <input type="text" name="username" class="form-control" placeholder="User Name" value="<?php echo $_COOKIE["username"]; ?>" required>
+                <input type="text" name="username" class="form-control" placeholder="User Name" value="<?php echo $username; ?>" required>
               </div>
               <div class="col-md-12 home">
                 Mật Khẩu:

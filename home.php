@@ -2,7 +2,16 @@
 <?php
 	session_start();
 	include "function.php";
-
+	if (isset($_GET['addProd_id'])) {
+		if (!isset($_SESSION['username'])) {
+			echo "
+			<script>
+			 alert('Vui Lòng Đăng Nhập');
+			 window.location.replace('./home.php');
+			</script>";
+		}else
+		addToCart($connect, $_SESSION['username'], $_GET['addProd_id'], 1);
+	}
    ?>
 <!DOCTYPE html>
 <html>

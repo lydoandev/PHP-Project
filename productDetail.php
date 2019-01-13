@@ -2,7 +2,7 @@
 	session_start();
 	 include "function.php"; 
 	 $info = array();
-	 
+	 $url = $_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
 	if (isset($_GET['prod_id'])) {
 	 	$show = "hidden";
 	 	$prod = new product();
@@ -17,6 +17,16 @@
 			$show = "show";
 	 	}
   }
+	if (isset($_POST['addCart'])) {
+		if (!isset($_SESSION['username'])) {
+		echo "
+			<script>
+			 alert('Vui Lòng Đăng Nhập');
+			 window.location.replace('$url');
+			</script>";
+		}else
+		addToCart($connect, $_SESSION['username'], $_GET['prod_id'], $_POST['quantity']);
+	}
 ?>
 <!DOCTYPE html>
 <html>
@@ -40,14 +50,15 @@
 	<div class="content">
 		<div class="container">
 		<div class="productDetail" style="margin: 50px 0px 50px 0px;">
-			<div class="row">
-				<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 image">
-					<div class="imageMain">
-						<img src="<?php echo $image[0] ?>" width="100%">
+			<form method="POST" action="">
+				<div class="row">
+					<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 image">
+						<div class="imageMain">
+							<img src="<?php echo $image[0] ?>" width="100%">
+						</div>
 					</div>
-				</div>
-				<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 detail">
-					<div class="row">
+					<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 detail">
+						<div class="row">
 						<p class="prod_name"><?php echo $info['prod_name']; ?></p>
 						<div class="col-xs-6 float-left">
 							Mã Hàng:
@@ -95,8 +106,8 @@
 								<span style="background: #c51a1d;" class="<?php echo $show; ?>"><i class="fa fa-sort-amount-desc"></i><?php echo $percent; ?>%</span>
 							</div>
 						</div>
-						<hr>
-						<div class="input-quantity row">
+							<hr>
+							<div class="input-quantity row">
 	             <div class='col-sm-2'>
 	             	&nbsp; Số lượng: 
 	             </div>
@@ -112,19 +123,21 @@
 	             <div class='col-sm-6'>
 	             	Còn <?php echo  $info['quantity']?> sản phẩm trong kho
 	             </div>
-	           </div>
-	           <hr>
-	           <div class="col-sm-3">
-	           </div>
-	           <div class="col-sm-3">
-	             <button class="btn btn-info text-uppercase" name = "addCart">Thêm vào giỏ</button>
-	           </div>
-	           <div class="col-sm-3">
-	             <button class="btn btn-info text-uppercase" name = "order">Mua ngay</button>
-	           </div>
+		           </div>
+		           <hr>
+		           <div class="col-sm-3">
+		           </div>
+		           <div class="col-sm-3">
+		             <button class="btn btn-info text-uppercase" name = "addCart">Thêm vào giỏ</button>
+		           </div>
+		           <div class="col-sm-3">
+		             <button class="btn btn-info text-uppercase" name = "order">Mua ngay</button>
+		           </div>
+						</div>
 					</div>
 				</div>
-			</div>
+			</form>
+			
 		</div>
 	</div>
 	</div>
