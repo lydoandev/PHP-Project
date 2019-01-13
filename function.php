@@ -524,25 +524,24 @@
 					 	}else $show = "show";
 			    	echo "
 			    		
+		             	<form method = 'GET' action='' name = 'form'>
 			    		<tr>
 			    			<td> <input type='checkbox' value = '".$row['prod_id'] ."'> </td>
 				        <td> <img src='$image[0]' width = '150px'>". $info['prod_name'] . "</td>
 				        <td> <s class = '$show'>" . number_format($info['price_out'])." đ</s>". number_format($info['new_price']). "đ</td>
 				        <td>
 		             	<button type='button' class='btn minus' onclick='minusProductQuantity(". $row['prod_id'].")'>-</button>&nbsp;
-		             	<form method = 'GET' action='' name = 'form'>
 		             		<input id='".$row['prod_id']."' type='text' name='quantity' style='width:50px;' value='".$row['quantity']."'>
- 						</form>
 		             	
 		             	<button type='button' class='btn plus' onclick='plusProductQuantity(". $row['prod_id'].")'>+</button> 
 		             	</td>
 				        <td>" . number_format($info['new_price']* $row['quantity']). "</td>
 				        <td class = 'text-center'>
-				        	<a href='cart.php?changeProd_id=" . $row['prod_id'] . "&changeOrder_id=".$row['order_id']. "&quantity=".$_GET['quantity']. "' type= 'button'><i class = 'fa fa-floppy-o' style='color: blue;'></i></a> &nbsp;
+				        	<a href='cart.php?changeProd_id=" . $row['prod_id'] . "&changeOrder_id=".$row['order_id']. "&quantity=". "' type= 'button'><i class = 'fa fa-floppy-o' style='color: blue;'></i></a> &nbsp;
 							<a href='cart.php?deleteProd_id=" . $row['prod_id'] . "&deleteOrder_id=".$row['order_id']. "'><i class = 'fa fa-trash-o' style='color: red;'></i></a>
 				        </td>
 				      </tr>
-				     
+				     </form>
 			    	";
 			    }
 			    echo "</tbody>

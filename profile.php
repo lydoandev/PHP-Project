@@ -95,7 +95,7 @@
 											<input type="radio" name="gender" value="Female" <?php if ($info['gender']=="Female") { echo "checked";} ?> >Female
 										</div>
 										<div class="col-md-12 home">
-											<input type="date" name="birthday" class="form-control"> value="<?php echo $info['birthday']; ?>">
+											<input type="date" name="birthday" class="form-control" value="<?php echo $info['birthday']; ?>">
 										</div>
 										<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 home">
 											<button class="btn" name="update">UPDATE</button>
