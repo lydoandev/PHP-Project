@@ -63,7 +63,7 @@
 		  quantity--;
 		  document.getElementById(input.id).value = quantity;
   	}
-	}
+  }
 
 </script>
 </html>
