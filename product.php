@@ -7,7 +7,7 @@
 		if (!isset($_SESSION['username'])) {
 			echo "
 			<script>
-			 alert('Vui Lòng Đăng Nhập');
+			 alert('Vui Lòng Đăng Nhập Để Mua Hàng');
 			 window.location.replace('./home.php');
 			</script>";
 		}else

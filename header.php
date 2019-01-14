@@ -250,7 +250,7 @@
           <form method="POST" action="">
             <div class="modal-body">
               <div class="col-md-12 home">
-                User Name:
+                Username:
                 <input type="text" name="username" class="form-control" placeholder="User Name" value="<?php echo $username; ?>" required>
               </div>
               <div class="col-md-12 home">
