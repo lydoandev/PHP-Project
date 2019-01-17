@@ -137,13 +137,33 @@
 	        	Quản Lí Thông Tin Người Dùng Dễ Dàng Hơn
 	        	<hr>
 	        	<form method="POST" action="">
-	        		<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 home" style="float: right;">
-								<button class="btn" name="themmoi">THÊM MỚI</button>
+	        		<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 home" style="float: left;">
+								<select class="form-control" name="object">
+								  <option value="username">Username</option>
+								  <option value="name">Họ Tên</option>
+								</select>
+							</div>
+							<div class="col-lg-5 col-md-5 col-sm-5 col-xs-5 home" style="float: left;">
+								<div class="input-group">
+									<input type="text" class="form-control" placeholder="Search..." name="content">
+								      <span class="input-group-btn">
+								        <button class="btn" type="submit" name="search" ><i class="fa fa-search fa-fw"></i></button>
+								      </span>
+								</div>
+							</div>
+							
+			        		<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 home" style="float: right;">
+								<a href="#views"><button class="btn" name="themmoi"><span><i class="fa fa-plus-square"></i></span>  THÊM MỚI</button></a>
 							</div>
 	        	</form>
 	        	
-	          <?php showAllUsers($connect); ?>
-						<div class="feature <?php echo $showInfo ?>">
+	          <?php
+		          if (isset($_POST['search'])) {
+		          	searchUser($connect, $_POST['object'], $_POST['content']);
+		          }else
+	           		showAllUsers($connect); 
+	           ?>
+						<div id="views" class="feature <?php echo $showInfo ?>">
 							<hr>
 							<h3>Thông Tin</h3>
 							<form method="POST" action="" enctype="multipart/form-data">
@@ -203,9 +223,8 @@
 								</div>
 							</form>
 						</div>
-						
-					</div>
-        </div>
+						</div>
+        	</div>
 		    </div>
 					
 				</div>

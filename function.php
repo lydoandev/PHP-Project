@@ -262,6 +262,7 @@
 
 		function insert_products($connect, $prod_id, $prod_name, $material, $image, $price_in, $price_out, $quantity, $description, $cate_id, $views, $new_price, $date_start, $date_end){
 			if ($connect) {
+				$url = $_SESSION['last_url'];
 				if ($this->check_prod_id($connect, $prod_id)) {
 					$sql1 = "INSERT INTO products (prod_id, prod_name, material, image, price_in, price_out, date_add, quantity, description, cate_id, views, status)
 					VALUES ('$prod_id', '$prod_name', '$material', '$image', '$price_in', '$price_out', NOW(), '$quantity', '$description', '$cate_id', '$views',1)";
@@ -270,6 +271,7 @@
 						if ($connect->query($sql2)) {
 						echo "<script> 
 							alert('Thêm Sản Phẩm Thành Công');
+							window.location.replace('..$url');
 						</script>";
 						}else echo "<script> alert('Đã xảy ra lỗi');</script>";
 					}else echo "<script> alert('Đã xảy ra lỗi');</script>";
@@ -281,15 +283,13 @@
 		function update_products($connect, $prod_id, $prod_name, $material, $image, $price_in, $price_out, $quantity, $date_add, $description, $cate_id, $views, $status, $new_price, $date_start, $date_end){
 			if ($connect) {
 				$url = $_SESSION['last_url'];
-				$sql1 = "UPDATE products SET prod_name = '$prod_name', material = '$material', image = '$image', price_in = '$price_in', price_out = '$price_out', date_add = '$date_add', quantity = '$quantity', description = '$description', cate_id = '$cate_id', views = '$views',status = '$status' WHERE prod_id = '$prod_id'";
-				$sql2 = "UPDATE promotion SET new_price = '$new_price', date_start = '$date_start', date_end = '$date_end' WHERE prod_id = '$prod_id'";
-				if ($connect->query($sql1)) {
-					if ($connect->query($sql2)) {
+				$sql = "UPDATE products SET prod_name = '$prod_name', material = '$material', image = '$image', price_in = '$price_in', price_out = '$price_out', date_add = '$date_add', quantity = '$quantity', description = '$description', cate_id = '$cate_id', views = '$views',status = '$status' WHERE prod_id = '$prod_id';";
+				$sql .= "UPDATE promotion SET new_price = '$new_price', date_start = '$date_start', date_end = '$date_end' WHERE prod_id = '$prod_id';";
+				if (mysqli_multi_query($connect, $sql)) {
 					echo "<script>
 					 	alert('Cập Nhật Sản Phẩm Thành Công');
 					 	window.location.replace('..$url');
 					 </script>";
-					}else echo "<script> alert('Đã xảy ra lỗi');</script>";
 				}else echo "<script> alert('Đã xảy ra lỗi');</script>";
 				
 			}
@@ -420,7 +420,7 @@
 
 	function chooseImage($target, $name){
 		$target_dir = $target."/";
-		$target_file = $target_dir . basename($_FILES["$name"]["name"]);
+		$target_file = $target_dir . basename($_FILES["$name"]["name"])."|";
 		$uploadOk = 1;
 		$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 
@@ -487,7 +487,7 @@
 				        <td>" . $row['is_active'] . "</td>
 				        <td>" . $row['last_access'] . "</td>
 				        <td class = 'text-center'>
-				        	<a href='administrator.php?viewUsername=" . $row['username'] . "'><i class = 'fa fa-eye' style='color: #3399ff;'></i></a>
+				        	<a href='administrator.php?viewUsername=" . $row['username'] . "#views'><i class = 'fa fa-eye' style='color: #3399ff;'></i></a>
 									<a class = '$show' type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteUrl. "')\" ><i class = 'fa fa-trash-o' style='color: red;'></i></a>
 				        </td>
 				      </tr>
@@ -506,8 +506,10 @@
 		if ($connect) {
 			$sql = "SELECT orders.order_id, prod_id, quantity FROM ords_prods, orders WHERE ords_prods.order_id = orders.order_id AND username = '$username' AND orders.status = 0";
 			$result = $connect->query($sql);
+			$order_id = getOrderIDNotYetOrder($connect, $username);
 			if ($result->num_rows > 0) {
-
+				$_SESSION['order_id'] = $order_id;
+			  $_SESSION['ajaxs'] = [];
 				
 				$total = totalPriceInOrder($connect, getOrderIDNotYetOrder($connect, $username));
 				echo "<table class='table'>
@@ -523,6 +525,7 @@
 							    </thead>
 							    <tbody>";
 			    while($row = $result->fetch_assoc()) {
+						array_push($_SESSION['ajaxs'], $row['prod_id']);
 			    	$prod_id = $row['prod_id'];
 			    	$prod = new product();
 			    	$info = $prod->showproduct($connect, $row['prod_id']);
@@ -539,17 +542,15 @@
 			    		<tr>
 			    			<td> <input type='checkbox' value = '".$row['prod_id'] ."'> </td>
 				        <td> <img src='$image[0]' width = '150px'>". $info['prod_name'] . "</td>
-				        <td> <s class = '$show'>" . number_format($info['price_out'])." đ</s>". number_format($info['new_price']). "đ</td>
+				        <td id='price".$row['prod_id']."'> <s class = '$show'>" . number_format($info['price_out'])." đ</s>". number_format($info['new_price']). "đ</td>
 				        <td>
-		             	<button type='button' class='btn minus' onclick='minusProductQuantity(". $row['prod_id'].")'>-</button>&nbsp;
+		             	<button type='button' id='minus" . $row['prod_id'] . "'class='btn minus'>-</button>&nbsp;
 		             		<input id='".$row['prod_id']."' type='text' name='quantity' style='width:50px;' value='".$row['quantity']."'>
-		             	
-		             	<button type='button' class='btn plus' onclick='plusProductQuantity(". $row['prod_id'].")'>+</button> 
+		             	<button type='button' id='plus" . $row['prod_id'] . "'class='btn plus' id='plus'>+</button> 
 		             	</td>
-				        <td>" . number_format($info['new_price']* $row['quantity']). "</td>
+				        <td id='total".$row['prod_id']."'>" . number_format($info['new_price']* $row['quantity']). "</td>
 				        <td class = 'text-center'>
-				        	<a href='cart.php?changeProd_id=" . $row['prod_id'] . "&changeOrder_id=".$row['order_id']. "&quantity=". "' type= 'button'><i class = 'fa fa-floppy-o' style='color: blue;'></i></a> &nbsp;
-							<a type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteurl. "')\"><i class = 'fa fa-trash-o' style='color: red;'></i></a>
+									<a type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteurl. "')\"><i class = 'fa fa-trash-o' style='color: red;'></i></a>
 				        </td>
 				      </tr>
 				     </form>
@@ -562,13 +563,15 @@
 					}else{
 						echo "<div class='col-xs-6'>
 							 </div>
-							 <div class='col-xs-6'>
+							 <div class='col-xs-5 float-right' id='totalPrice'>
 							 	<form method='POST' action=''>
 							 		<b>TỔNG TIỀN: </b>". number_format($total)."
-
 							 	</form>
+							 </div>
+							 <div class='col-xs-2 float-right' id='totalPrice'>
 							 	
-							 </div>";
+							 </div>
+							 ";
 					}
 					
 			} else {
@@ -580,8 +583,25 @@
 		}
 	}	
 
-	function checkProductHaspromotion(){
-
+	function order($connect, $username, $order_address, $prod_id, $quantity){
+		if ($connect) {
+			$url = $_SESSION['last_url'];
+			$sql = "INSERT INTO orders(username, order_address, status) VALUES('$username', '$order_address', 1);";
+			if ($connect->query($sql)) {
+				$order_id = $connect->insert_id;
+				$sql = "INSERT INTO ords_prods VALUES($order_id, '$prod_id', $quantity);";
+				$prod = new product();
+				$info = $prod->showProduct($connect, $prod_id);
+				$updateQuantity = $info['quantity'] - $quantity;
+				$sql .= "UPDATE products SET quantity = $updateQuantity WHERE prod_id = '$prod_id'";
+				if (mysqli_multi_query($connect, $sql)) {
+						echo "<script>
+						 alert('Đặt hàng thành công');
+						 window.location.replace('..$url');
+						</script>";
+				}else echo "<script> alert('Có lỗi');</script>";
+			}else echo "<script> alert('Có lỗi đéo');</script>";
+		}
 	}
 
 	function totalPriceInOrder($connect, $order_id){
@@ -594,8 +614,8 @@
 					$prod = new product();
 					$info = $prod->showproduct($connect, $row['prod_id']);
 					if ($info['new_price'] == "") {
-						$totalPrice += $info['price_out'];
-					}else $totalPrice += $info['new_price'];
+						$totalPrice += $info['price_out'] * $row['quantity'];
+					}else $totalPrice += $info['new_price'] * $row['quantity'];
 				}
 				return $totalPrice;
 			}else return "";
@@ -603,9 +623,12 @@
 		return "";
 	}
 
-	function showAllProduct($connect){
+	function showAllProduct($connect, $cate_id){
 		if ($connect) {
-			$sql = "SELECT products.prod_id, prod_name, material, image, price_in, price_out, date_add, quantity, description, cate_name, views, status, products.delete_at, new_price, date_start, date_end FROM products LEFT JOIN categories ON products.cate_id = categories.cate_id LEFT JOIN promotion ON products.prod_id = promotion.prod_id;";
+			if ($cate_id == "") {
+				$sql = "SELECT products.prod_id, prod_name, material, image, price_in, price_out, date_add, quantity, description,products.cate_id, cate_name, views, status, products.delete_at, new_price, date_start, date_end FROM products LEFT JOIN categories ON products.cate_id = categories.cate_id LEFT JOIN promotion ON products.prod_id = promotion.prod_id;";
+			}else $sql = "SELECT products.prod_id, prod_name, material, image, price_in, price_out, date_add, quantity, description,products.cate_id, cate_name, views, status, products.delete_at, new_price, date_start, date_end FROM products LEFT JOIN categories ON products.cate_id = categories.cate_id LEFT JOIN promotion ON products.prod_id = promotion.prod_id WHERE products.cate_id = '$cate_id';";
+			
 			$result = $connect->query($sql);
 			if ($result->num_rows > 0) {
 				echo "<table class='table table-bordered'>
@@ -641,7 +664,7 @@
 				        <td>" . $row['cate_name'] . "</td>
 				        <td>" . $row['status'] . "</td>
 				        <td class = 'text-center'>
-				        	<a href='stocker.php?viewProd_id=" . $row['prod_id'] . "'><i class = 'fa fa-pencil-square-o' style='color: #3399ff;'></i></a> 
+				        	<a href='stocker.php?cate_id=".$row['cate_id']."&viewProd_id=" . $row['prod_id'] . "#views'><i class = 'fa fa-pencil-square-o' style='color: #3399ff;'></i></a> 
 				        	<a class = '$show' type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteUrl. "')\" ><i class = 'fa fa-trash-o' style='color: red;'></i></a>
 				        </td>
 				      </tr>
@@ -667,7 +690,7 @@
 		return "";
 	}
 
-	function getQuantityProductInCart($connect, $order_id, $prod_id){
+	function getQuantityProductInOrder($connect, $order_id, $prod_id){
 		if ($connect) {
 			$sql = "SELECT quantity FROM ords_prods WHERE order_id = '$order_id' AND prod_id = '$prod_id'";
 			$result=$connect->query($sql);
@@ -679,17 +702,29 @@
 		return "";
 	}
 
+	function getTotalQuantityInCartByUser($connect, $username){
+		if ($connect) {
+			$sql = "SELECT SUM(ords_prods.quantity) AS total FROM ords_prods, orders WHERE ords_prods.order_id = orders.order_id AND username = '$username' AND status = 0";
+			$result=$connect->query($sql);
+				if ($result->num_rows > 0) {
+					$row = $result->fetch_assoc();
+					return $row['total'];
+				}else return "";
+		}
+		return "";
+	}
+
 
 	function addToCart($connect, $username, $prod_id, $quantity){
 		$url = $_SESSION['last_url'];
 		if ($connect) {
+			$prod = new product();
+			$info = $prod->showproduct($connect, $prod_id);
 			$order_id = getOrderIDNotYetOrder($connect, $username);
 			if ($order_id == "") {
 				$sql = "INSERT INTO orders(username, status) VALUES ('$username', 0)";
 				if ($connect->query($sql)) {
 					$order_id = getOrderIDNotYetOrder($connect, $username);
-					$prod = new product();
-					$info = $prod->showproduct($connect, $prod_id);
 					if ($quantity>$info['quantity']) {
 						echo "<script>
 							 alert('Số Lượng Sản Phẩm Không Đủ');
@@ -711,28 +746,44 @@
 					}
 				}
 			}else {
-				$qtt = getQuantityProductInCart($connect, $order_id, $prod_id);
+				$qtt = getQuantityProductInOrder($connect, $order_id, $prod_id);
 					if ($qtt == "") {
-						$sql = "INSERT INTO ords_prods VALUES ('$order_id', '$prod_id', '$quantity')";
-						if ($connect->query($sql)) {
+						if ($quantity>$info['quantity']) {
 							echo "<script>
-								 alert('Thêm vào giỏ hàng thành công');
-								 window.location.replace('..$url');
-								</script>";
-						}else {
-							echo "<script>
-								 alert('Đã xảy ra lỗi');
+								 alert('Số Lượng Sản Phẩm Không Đủ');
 								 window.location.replace('..$url');
 								</script>";
 						}
+						else {
+							$sql = "INSERT INTO ords_prods VALUES ('$order_id', '$prod_id', '$quantity')";
+							if ($connect->query($sql)) {
+								echo "<script>
+									 alert('Thêm vào giỏ hàng thành công');
+									 window.location.replace('..$url');
+									</script>";
+							}else {
+								echo "<script>
+									 alert('Đã xảy ra lỗi');
+									 window.location.replace('..$url');
+									</script>";
+							}
+						}
 					}else {
 						$quantity = $quantity + $qtt;
-						$sql = "UPDATE ords_prods SET quantity = '$quantity' WHERE order_id = '$order_id' AND prod_id = '$prod_id'";
-						if ($connect->query($sql)) {
+						if ($quantity>$info['quantity']) {
 							echo "<script>
-								 alert('Thêm vào giỏ hàng thành công');
+								 alert('Số Lượng Sản Phẩm Không Đủ');
 								 window.location.replace('..$url');
 								</script>";
+						}
+						else {
+							$sql = "UPDATE ords_prods SET quantity = '$quantity' WHERE order_id = '$order_id' AND prod_id = '$prod_id'";
+							if ($connect->query($sql)) {
+								echo "<script>
+									 alert('Thêm vào giỏ hàng thành công');
+									 window.location.replace('..$url');
+									</script>";
+							}
 						}
 					}
 			}
@@ -789,20 +840,48 @@
 					</div>
 				";
 				}
+			}else echo "
+					<div class = 'solugan' style='margin-top: 100px;'>
+					<h3>HIỆN TẠI CHƯA CÓ BẤT KÌ ĐƠN HÀNG NÀO</h3>
+					</div>
+				";
+		}
+	}
+
+	function deleteOrdering($connect, $order_id){
+		if ($connect) {
+			$sql = "SELECT prod_id FROM ords_prods WHERE order_id = $order_id";
+			$result = $connect->query($sql);
+			if ($result->num_rows > 0) {
+				while($row = $result->fetch_assoc()) {
+					$prod = new product();
+					$info = $prod->showProduct($connect, $row['prod_id']);
+					$updateQuantity = $info['quantity'] + getQuantityProductInOrder($connect, $order_id, $row['prod_id']);
+					$sql = "UPDATE products SET quantity = $updateQuantity WHERE prod_id = '".$row['prod_id']. "'";
+					$connect->query($sql);
+				}
+			}
+			$sql = "DELETE FROM ords_prods WHERE order_id = $order_id";
+			if ($connect->query($sql)) {
+				$sql= " DELETE FROM orders WHERE order_id = $order_id";
+				if ($connect->query($sql)) {
+					echo "<script> alert('Hủy đơn hàng thành công');</script>";
+				}else echo "<script> alert('Chưa hủy được');</script>";
 			}
 		}
 	}
 
 	function showOrdering($connect, $username){
 		if ($connect) {
-			$sql = "SELECT * FROM orders WHERE username = '$username' AND status = 1 AND ship_date > NOW()";
+			$sql = "SELECT * FROM orders WHERE username = '$username' AND status = 1 AND (ship_date > NOW() OR ship_date IS NULL)";
 			$result = $connect->query($sql);
 			if ($result->num_rows > 0) {
 				while($row = $result->fetch_assoc()) {
 					showProductInOrder($connect, $row['order_id']);
 					$total = totalPriceInOrder($connect, $row['order_id']);
+					$deleteUrl = "profile.php?order_id=".$row['order_id'];
 					echo "
-						<div class= 'col-xs-6'>
+						<div class= 'col-xs-3'>
 						</div>
 						<div class= 'col-xs-3' style= 'color: red'>
 							Ngày Giao: ".$row['ship_date']. "
@@ -810,10 +889,184 @@
 						<div class= 'col-xs-3'>
 							TỔNG TIỀN: ".number_format($total)."
 						</div>
+						<div class= 'col-xs-3'>
+							<a type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteUrl. "')\" ><i class = 'fa fa-trash-o fa-2x' style='color: red;'></i>HỦY</a>
+						</div>
+						
+						<hr style = 'border: 1px solid #333333'>;
 					";
 				}
+			}else echo "
+					<div class = 'solugan' style='margin-top: 100px;'>
+					<h3>HIỆN TẠI CHƯA CÓ BẤT KÌ ĐƠN HÀNG NÀO</h3>
+					</div>
+				";
+		}
+	}
+
+	function searchUser($connect, $object, $content){
+		if ($connect) {
+			unset($_GET['viewUsername']);
+			if ($object == "username") {
+				$sql = "SELECT * FROM users WHERE username LIKE '%$content%'";
+			}else
+				$sql = "SELECT * FROM users WHERE first_name LIKE '%$content%' OR last_name LIKE '%$content%'";
+			
+			$result = $connect->query($sql);
+			$stt = 1;
+			if ($result->num_rows > 0) {
+				echo "<table class='table table-bordered'>
+							    <thead style='background: #c299ff'>
+							      <tr>
+							      	<th>STT</th>
+							        <th>UserName</th>
+							        <th>Họ Tên</th>
+							        <th>Ngày Sinh</th>
+							        <th>Giới Tính</th>
+							        <th>Vai Trò</th>
+							        <th>Tình Trạng</th>
+							        <th>Đăng Nhập Cuối</th>
+							        <th>Thao Tác</th>
+							      </tr>
+							    </thead>
+							    <tbody>";
+			    while($row = $result->fetch_assoc()) {
+			    	$show = "show";
+			    	if ($row['is_active'] == 0 & $row['delete_at'] != "") {
+			    		$show = "hidden";
+			    	}
+			    	if ($row['is_active'] == 0) {
+			    		$color = 'red';
+			    	}else $color = '#1ac6ff';
+			    	$deleteUrl = "administrator.php?username=" . $row['username'];
+			    	echo "
+			    		<tr style='color: $color'> <td>$stt</td>
+				        <td>" . $row['username'] . "</td>
+				        <td>" . $row['last_name']." " .$row['first_name']. "</td>
+				        <td>" . $row['birthday'] . "</td>
+				        <td>" . $row['gender'] . "</td>
+				        <td>" . $row['u_role'] . "</td>
+				        <td>" . $row['is_active'] . "</td>
+				        <td>" . $row['last_access'] . "</td>
+				        <td class = 'text-center'>
+				        	<a href='administrator.php?viewUsername=" . $row['username'] . "#views'><i class = 'fa fa-eye' style='color: #3399ff;'></i></a>
+									<a class = '$show' type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteUrl. "')\" ><i class = 'fa fa-trash-o' style='color: red;'></i></a>
+				        </td>
+				      </tr>
+			    	";
+			    	$stt++;
+			    }
+			    echo "</tbody>
+							  </table>";
+			} else {
+			    echo "Không Tìm Thấy";
 			}
 		}
 	}
 
- ?>	
+	function searchProduct($connect, $prod_name){
+		if ($connect) {
+			$sql = "SELECT products.prod_id, prod_name, material, image, price_in, price_out, date_add, quantity, description,products.cate_id, cate_name, views, status, products.delete_at, new_price, date_start, date_end FROM products LEFT JOIN categories ON products.cate_id = categories.cate_id LEFT JOIN promotion ON products.prod_id = promotion.prod_id WHERE prod_name LIKE '%$prod_name%';";
+			
+			$result = $connect->query($sql);
+			if ($result->num_rows > 0) {
+				echo "<table class='table table-bordered'>
+							    <thead style='background: #c299ff'>
+							      <tr>
+							        <th>ID</th>
+							        <th>Tên</th>
+							        <th>Vật Liệu</th>
+							        <th>Giá Bán</th>
+							        <th>Số Lượng</th>
+							        <th>Danh Mục</th>
+							        <th>Status</th>
+							        <th>Thao Tác</th>
+							      </tr>
+							    </thead>
+							    <tbody>";
+			    while($row = $result->fetch_assoc()) {
+			    	$show = "show";
+			    	if ($row['status'] == 0 & $row['delete_at'] != "") {
+			    		$show = "hidden";
+			    	}
+			    	if ($row['status'] == 0) {
+			    		$color = 'red';
+			    	}else $color = '#1ac6ff';
+			    	$deleteUrl = "stocker.php?prod_id=" . $row['prod_id'];
+			    	echo "
+			    		<tr style='color: $color'>
+				        <td>" . $row['prod_id'] . "</td>
+				        <td>" . $row['prod_name']. "</td>
+				        <td>" . $row['material'] . "</td>
+				        <td>" . $row['price_out'] . "</td>
+				        <td>" . $row['quantity'] . "</td>
+				        <td>" . $row['cate_name'] . "</td>
+				        <td>" . $row['status'] . "</td>
+				        <td class = 'text-center'>
+				        	<a href='stocker.php?viewProd_id=" . $row['prod_id'] . "#views'><i class = 'fa fa-pencil-square-o' style='color: #3399ff;'></i></a> 
+				        	<a class = '$show' type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteUrl. "')\" ><i class = 'fa fa-trash-o' style='color: red;'></i></a>
+				        </td>
+				      </tr>
+			    	";
+			    }
+			    echo "</tbody>
+							  </table>";
+			} else {
+			    echo "0 results";
+			}
+		}
+	}
+
+	function changeQuantityControl($order_id, $id) {
+	   echo "
+	     <script type='text/javascript'>
+	       $('#minus" . $id . "').click(function(){
+	         $.ajax({
+	           url: 'cart.php?action=minus&order_id=" . $order_id . "&prod_id=" . $id . "',
+	           type: 'GET',
+	           dataType: 'html',
+	           success: function(){
+	             if(document.getElementById('" . $id . "').value < 0) {
+	               
+			          }else {
+			          	document.getElementById('" . $id . "').value--;
+		              $('#total" . $id . "').load('cart.php #total" . $id . "');
+			            $('#totalPrice').load('cart.php #totalPrice');
+		              $('#header-right').load('cart.php #header-right');
+			          }
+	           }
+	         });
+	       });
+	       $('#plus" . $id . "').click(function(){
+	         $.ajax({
+	           url: 'cart.php?action=plus&order_id=" . $order_id . "&prod_id=" . $id . "',
+	           type: 'GET',
+	           dataType: 'html',
+	           success: function(){
+	             document.getElementById('" . $id . "').value++;
+	             $('#total" . $id . "').load('cart.php #total" . $id . "');
+	             $('#totalPrice').load('cart.php #totalPrice');
+	             $('#header-right').load('cart.php #header-right');
+		          }
+	         });
+	       });
+	     </script>
+	   ";
+	}
+
+ 	function updateQuantityOnOrder($connect, $order_id, $prod_id, $operator) {
+	 	$new_quantity = getQuantityProductInOrder($connect, $order_id, $prod_id);
+	 	$url = $_SESSION['last_url'];
+	  if ($operator == "minus") {
+	    if ($new_quantity > 0) {
+	      $new_quantity--;
+	    }
+	  } elseif ($operator == "plus") {
+	    $new_quantity++;
+	  }
+	  $sql = "UPDATE ords_prods SET quantity = " . $new_quantity . " WHERE order_id = " . $order_id . " AND prod_id = '$prod_id'";
+	  if ($connect->query($sql)) {
+	    showCart($connect, $_SESSION['username']);
+	  }
+ 	}
+?>	

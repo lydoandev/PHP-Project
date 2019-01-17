@@ -1,6 +1,7 @@
 <?php
 	session_start();
-	 include "function.php"; 
+	 include "function.php";
+
 	 $info = array();
 	 $url = $_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
 	if (isset($_GET['prod_id'])) {
@@ -29,6 +30,26 @@
 		}else
 		addToCart($connect, $_SESSION['username'], $_GET['prod_id'], $_POST['quantity']);
 	}
+
+	if (isset($_SESSION['username'])) {
+			$user = new user();
+	 		$infoUser = $user->showInfo($connect, $_SESSION['username']); 
+	}else $infoUser['address']="";
+
+	if (isset($_POST['order'])) {
+		if (!isset($_SESSION['username'])) {
+			echo "
+				<script>
+				 alert('Vui Lòng Đăng Nhập');
+				 window.location.replace('$url');
+				</script>";
+		} else {
+			order($connect, $_SESSION['username'], $_POST['address'], $_GET['prod_id'], $_POST['quantity']);
+		}
+	}
+	if (isset($_POST['ok'])) {
+		
+	}
 ?>
 <!DOCTYPE html>
 <html>
@@ -48,15 +69,28 @@
 	<?php 
 		include "header.php";
 	 ?>
-
 	<div class="content">
 		<div class="container">
 			<div class="productDetail" style="margin: 50px 0px 50px 0px;">
 				<form method="POST" action="">
 					<div class="row">
 						<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 image">
-							<div class="imageMain">
-								<img src="<?php echo $image[0] ?>" width="100%">
+							<div class="imageMain col-lg-12 col-md-12 col-sm-12 col-xs-12">
+								<img id="expandedImg" src="<?php echo $image[0] ?>" width="100%">
+							</div>
+							<div class="row">
+							  <div class="col-xs-3" style="margin-top: 30px;">
+							    <img src="<?php echo $image[0] ?>" style="width:100%" onclick="changeImage(this);">
+							  </div>
+							  <div class="col-xs-3" style="margin-top: 30px;">
+							    <img src="<?php echo $image[1] ?>" style="width:100%" onclick="changeImage(this);">
+							  </div>
+							  <div class="col-xs-3" style="margin-top: 30px;">
+							    <img src="<?php echo $image[2] ?>" style="width:100%" onclick="changeImage(this);">
+							  </div>
+							  <div class="col-xs-3" style="margin-top: 30px;">
+							    <img src="<?php echo $image[3] ?>"  style="width:100%" onclick="changeImage(this);">
+							  </div>
 							</div>
 						</div>
 						<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 detail">
@@ -123,20 +157,26 @@
 		             	<button type="button" class="btn plus" onclick="plusProductQuantity()">+</button> 
 		             </div>
 		             <div class='col-sm-6'>
-		             	Còn <?php echo  $info['quantity']?> sản phẩm trong kho
+		             	<?php echo  $info['quantity']?> sản phẩm có sẵn
 		             </div>
+			           </div>
+			           <hr>
+			           <div id="address" class="col-sm-12">
+			           	Địa chỉ giao hàng:
+			             <input type="text" name="address" class="form-control" placeholder="Địa chỉ giao hàng" value="<?php echo $infoUser['address'] ?>">
 			           </div>
 			           <hr>
 			           <div class="col-sm-3">
 			           </div>
 			           <div class="col-sm-3">
-			             <button class="btn btn-info text-uppercase" name = "addCart">Thêm vào giỏ</button>
+			             <button class="btn btn-info text-uppercase" name="addCart">Thêm vào giỏ</button>
 			           </div>
 			           <div class="col-sm-3">
-			             <button class="btn btn-info text-uppercase" name = "order">Mua ngay</button>
+			             <button class="btn btn-info text-uppercase" name="order">Mua ngay</button>
 			           </div>
 							</div>
 						</div>
+
 					</div>
 				</form>
 				
@@ -206,6 +246,11 @@
 	function updateQuantity(qtt) {
 		document.getElementById("quantity").value = qtt;
 		quantity = qtt;
+	}
+	function changeImage(imgs) {
+	  var expandImg = document.getElementById("expandedImg");
+	  expandImg.src = imgs.src;
+	  expandImg.parentElement.style.display = "block";
 	}
 </script>
 </html>

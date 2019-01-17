@@ -21,6 +21,9 @@
 		$user->updateInfo($connect, $_SESSION['username'], $avatar_url, $_POST['last_name'], $_POST['first_name'], $_POST['email'], $_POST['address'], $_POST['phone'], $_POST['gender'], $_POST['birthday']);
 	}
 
+	if (isset($_GET['order_id'])) {
+		deleteOrdering($connect, $_GET['order_id']);
+	}
 	
 ?>
 <!DOCTYPE html>
@@ -153,20 +156,20 @@
 	            <div class="tablist row">
 		            <ul role="tablist" class="nav nav-tabs small">
 		              <li class=" nav-item active col-lg-6 col-md-6 col-sm-6 col-xs-6">
-		                <a href="#tabs-1" data-toggle="tab" aria-expanded="true"><h4>Đang Giao</h4></a>
+		                <a href="#ordering" data-toggle="tab" aria-expanded="true"><h4>Đang Giao</h4></a>
 		              </li>
 		              <li class="nav-item col-lg-6 col-md-6 col-sm-6 col-xs-6">
-		                <a href="#tabs-2" data-toggle="tab" aria-expanded="true"><h4><h4>Đã Giao</h4></a>
+		                <a href="#ordered" data-toggle="tab" aria-expanded="true"><h4><h4>Đã Giao</h4></a>
 		              </li>
 		            </ul>
 		          </div>
 
 		          <div class="tab-content">
-		            <div id="tabs-1" class="tab-pane active">
+		            <div id="ordering" class="tab-pane active">
 		              <?php showOrdering($connect, $_SESSION['username']); ?>
 		            </div>
 
-		            <div id="tabs-2" class="tab-pane fade">
+		            <div id="ordered" class="tab-pane fade">
 		              <?php showOrdered($connect, $_SESSION['username']); ?>
 		            </div>
 		          </div>
@@ -183,3 +186,12 @@
 <?php include "footer.php" ;?>
 </body>
 </html>
+<script>
+	function confirmDelete(url) {
+	    if (confirm("Bạn có chắc chắn muốn hủy không?")) {
+	        window.location.replace(url);
+	    } else {
+	        false;
+	    }       
+	}
+</script>

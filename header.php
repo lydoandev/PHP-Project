@@ -36,6 +36,7 @@
     $username = $_SESSION['username'];
     $avatar = $_SESSION['avatar_url'];
     $showUsername = "show";
+    $_SESSION['totalQuantity'] = getTotalQuantityInCartByUser($connect, $_SESSION['username']);
   }
 
   $_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
@@ -90,7 +91,7 @@
             
           </div>
           <div class="header-right col-lg-5 col-md-6 col-sm-6 col-xs-6">
-            <ul class="nav navbar-nav">
+            <ul class="nav navbar-nav" id="header-right">
               <li>
                 <a href="" data-toggle="modal" data-target="#dangki"><span><i class="fa fa-bell-o "></i></span> THÔNG BÁO </a>
               </li>
@@ -115,7 +116,7 @@
                   </span> ĐĂNG NHẬP
                 </a>
               </li>
-              <li><a href="cart.php"><span><i class="fa fa-shopping-cart fa-2x <?php echo $showUsername;?>"></i></span></a></li>
+              <li><a href="cart.php"><span><i class="fa fa-shopping-cart fa-2x <?php echo $showUsername;?>"><sup><?php echo $_SESSION['totalQuantity']; ?></sup></i></span></a></li>
               <li class="dropdown" class="<?php echo $showUsername;?>">
                   <a href="#" id="user" class="<?php echo $showUsername;?> ?>" data-toggle="dropdown">
                     <img class="img-circle" width="15" height="15" src="<?php echo $avatar ?>">
@@ -250,7 +251,7 @@
           <form method="POST" action="">
             <div class="modal-body">
               <div class="col-md-12 home">
-                Username:
+                User Name:
                 <input type="text" name="username" class="form-control" placeholder="User Name" value="<?php echo $username; ?>" required>
               </div>
               <div class="col-md-12 home">

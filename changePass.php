@@ -7,7 +7,7 @@
 		$user = new user();
 		$errOldPass = $user->updatePassword($connect, $_SESSION['username'], $_POST['oldPassword'], $_POST['newPassword']);
 		if ($_POST['newPassword'] != $_POST['confirmPassword']) {
-			$errConfirm = "* Nhập Lại Mật Khẩu Không Chính Xác. Vui lòng nhập lại";
+			$errConfirm = "* Nhập Lại Mật Khẩu Không Chính Xác";
 		}
 	}
 

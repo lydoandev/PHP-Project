@@ -23,9 +23,15 @@
 		$showInfo = "show";
 	}
 	if (isset($_POST['add'])) {
-		$image = chooseImage("Image/Product", "file");
+		$img = "";
+    for ($i = 0; $i < 4; $i++) {
+    	$name = "file".$i;
+    	if (chooseImage("Image/Product", $name) != "Image/Product/|") {
+    		$img.=chooseImage("Image/Product", $name);
+    	}
+    }
 		$product = new product();
-		$product->insert_products($connect, $_POST['prod_id'], $_POST['prod_name'], $_POST['material'], $image, $_POST['price_in'], $_POST['price_out'], $_POST['quantity'], $_POST['description'], $_POST['cate_id'], $_POST['views'], $_POST['new_price'], $_POST['date_start'], $_POST['date_end']);
+		$product->insert_products($connect, $_POST['prod_id'], $_POST['prod_name'], $_POST['material'], $img, $_POST['price_in'], $_POST['price_out'], $_POST['quantity'], $_POST['description'], $_POST['cate_id'], $_POST['views'], $_POST['new_price'], $_POST['date_start'], $_POST['date_end']);
 	}
 
 	if (isset($_GET["viewProd_id"])) {
@@ -39,14 +45,16 @@
 
 	$_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
 	if (isset($_POST['update'])) {
-		$image = chooseImage("Image/Product", "file");
-		if ($image == "Image/Product/") {
-			$image =$info['image'];
-			echo "Ly $image";
-		}
-		$product = new product();
-		$product->update_products($connect, $_POST['prod_id'], $_POST['prod_name'], $_POST['material'], $image, $_POST['price_in'], $_POST['price_out'], $_POST['quantity'], $_POST['date_add'], $_POST['description'], $_POST['cate_id'], $_POST['views'],  $_POST['status'], $_POST['new_price'], $_POST['date_start'], $_POST['date_end']);
-	}
+		$img = "";
+    for ($i = 0; $i < 4; $i++) {
+    	$name = "file".$i;
+    	if (chooseImage("Image/Product", $name) == "Image/Product/|") {
+    		$img.=$image[$i]."|";
+    	}else $img.=chooseImage("Image/Product", $name);
+    }
+    $product = new product();
+		$product->update_products($connect, $_POST['prod_id'], $_POST['prod_name'], $_POST['material'], $img, $_POST['price_in'], $_POST['price_out'], $_POST['quantity'], $_POST['date_add'], $_POST['description'], $_POST['cate_id'], $_POST['views'],  $_POST['status'], $_POST['new_price'], $_POST['date_start'], $_POST['date_end']);
+  }
 	
  ?>
 <!DOCTYPE html>
@@ -128,29 +136,63 @@
 			        	Quản Lí Thông Tin Sản Phẩm Dễ Dàng Hơn
 			        	<hr>
 			        	<form method="POST" action="">
+			        		<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 home" style="float: left;">
+								<select class="form-control" name="object" onchange="showProductForCate(this.value)">
+									<option value="">Danh Mục</option>
+								  <?php 
+								  	$sql = "SELECT * FROM categories WHERE delete_at IS NULL";
+										$result = $connect->query($sql);
+										if ($result->num_rows > 0) {
+										while($row = $result->fetch_assoc()) {
+											$cate_id = $row['cate_id'];
+												echo "<option value='". $row['cate_id']. "'$s>". $row['cate_name'] . "</option>";
+											}
+										}
+								  ?>
+								</select>
+							</div>
+							<div class="col-lg-5 col-md-5 col-sm-5 col-xs-5 home" style="float: left;">
+								<div class="input-group">
+									<input type="text" class="form-control" placeholder="Tên sản phẩm..." name="content">
+								      <span class="input-group-btn">
+								        <button class="btn" type="submit" name="search" ><i class="fa fa-search fa-fw"></i></button>
+								      </span>
+								</div>
+							</div>
 			        		<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 home" style="float: right;">
-										<button class="btn" name="themmoi">THÊM MỚI</button>
-									</div>
+								<a href="#views"><button class="btn" name="themmoi">THÊM MỚI</button></a>
+							</div>
 			        	</form>
 			        	<?php 
-			        		showAllProduct($connect);
+			        		if (isset($_POST['search'])) {
+			        			searchProduct($connect, $_POST['content']);
+			        			$showInfo = "hidden";
+			        		}else if (isset($_GET['cate_id'])) {
+			        			showAllProduct($connect, $_GET['cate_id']);
+			        		}else showAllProduct($connect, "CATE_01");
 			        	 ?>
-			        	 <div class="feature <?php echo $showInfo ?>">
+			        	 <div id="views" class="feature <?php echo $showInfo ?>">
 										<hr>
 										<h3>Thông Tin</h3>
 										<form method="POST" action="" enctype="multipart/form-data">
 											<div class="col-xs-3">
 												<img src="<?php echo $image[0]; ?>" width = "150px;" height = "150px;">
-												<input type="file" name="file" class="form-control home"  >
+												<input type="file" name="file0" class="form-control home">
+												<img src="<?php echo $image[1]; ?>" width = "150px;" height = "150px;">
+												<input type="file" name="file1" class="form-control home">
+												<img src="<?php echo $image[2]; ?>" width = "150px;" height = "150px;">
+												<input type="file" name="file2" class="form-control home">
+												<img src="<?php echo $image[3]; ?>" width = "150px;" height = "150px;">
+												<input type="file" name="file3" class="form-control home">
 											</div>
 											<div class="col-xs-9">
 												<div class="row">
 													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home">
-														<p class="<?php echo $showUpdate?>"><b>ID:</b></p>
+														<p><b>ID:</b></p>
 														<input type="text" name="prod_id" class="form-control" value="<?php echo $info['prod_id']?>" placeholder = "ID">
 													</div>
 													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home">
-														<p class="<?php echo $showUpdate?>"><b>Danh Mục:</b></p>
+														<p><b>Danh Mục:</b></p>
 														<select class="form-control" name="cate_id">
 															<option value="">Danh Mục</option>
 														  <?php 
@@ -160,54 +202,54 @@
 														</select> 
 													</div>
 													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home">
-														<p class="<?php echo $showUpdate?>"><b>Tên Sản Phẩm:</b></p>
+														<p><b>Tên Sản Phẩm:</b></p>
 														<input type="text" name="prod_name" class="form-control" value="<?php echo $info['prod_name']?>" placeholder = "Tên sản phẩm">
 													</div>
 													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home">
-														<p class="<?php echo $showUpdate?>"><b>Vật Liệu:</b></p>
+														<p><b>Vật Liệu:</b></p>
 														<input type="text" name="material" class="form-control" value="<?php echo $info['material']?>" placeholder = "Vật Liệu">
 													</div>
 													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home">
-														<p class="<?php echo $showUpdate?>"><b>Giá Nhập:</b></p>
+														<p><b>Giá Nhập:</b></p>
 														<input type="text" name="price_in" class="form-control" value="<?php echo $info['price_in']?>" placeholder = "Giá Nhập">
 													</div>
 													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home">
-														<p class="<?php echo $showUpdate?>"><b>Giá Bán:</b></p>
+														<p><b>Giá Bán:</b></p>
 														<input type="text" name="price_out" class="form-control" value="<?php echo $info['price_out']?>" placeholder = "Giá Bán">
 													</div>
 													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home">
-														<p class="<?php echo $showUpdate?>"><b>Số Lượng:</b></p>
+														<p><b>Số Lượng:</b></p>
 														<input type="text" name="quantity" class="form-control" value="<?php echo $info['quantity']?>" placeholder = "Số Lượng">
 													</div>
 													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home">
-														<p class="<?php echo $showUpdate?>"><b>Ngày Nhập:</b></p>
+														<p><b>Ngày Nhập:</b></p>
 														<input type="date" name="date_add" class="form-control <?php echo $showUpdate ?>" value="<?php echo $info['date_add']?>">
 													</div>
 													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home <?php echo $showUpdate?>">
-														<p class="<?php echo $showUpdate?>"><b>Tình Trạng:</b></p>
+														<p><b>Tình Trạng:</b></p>
 														<select class="form-control" name="status">
 														  <option value="1" <?php if ($info['status'] == 1) { echo "selected";} ?>>Còn Hàng</option>
 														  <option value="0" <?php if ($info['status'] == 0) { echo "selected";} ?>>Hết Hàng</option>
 														</select>
 													</div>
 													<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 home">
-														<p class="<?php echo $showUpdate?>"><b>Miêu Tả:</b></p>
+														<p><b>Miêu Tả:</b></p>
 														<textarea class="form-control rounded-0" name="description" rows="4" value="<?php echo $info['description']?>" placeholder = "Miêu Tả Sản Phẩm"><?php echo $info['description']?></textarea>
 													</div>
 													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home">
-														<p class="<?php echo $showUpdate?>"><b>Lượt Xem:</b></p>
+														<p><b>Lượt Xem:</b></p>
 														<input type="text" name="views" class="form-control" value="<?php echo $info['views']?>" placeholder = "Lượt xem">
 													</div>
 													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home">
-														<p class="<?php echo $showUpdate?>"><b>Giá KM:</b></p>
+														<p><b>Giá KM:</b></p>
 														<input type="text" name="new_price" class="form-control" value="<?php echo $info['new_price']?>" placeholder = "Giá Khuyến Mãi">
 													</div>
 													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home">
-														<p class="<?php echo $showUpdate?>"><b>Ngày bắt đầu KM::</b></p>
+														<p><b>Ngày bắt đầu KM::</b></p>
 														<input type="date" name="date_start" class="form-control" value="<?php echo $info['date_start']?>">
 													</div>
 													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home">
-														<p class="<?php echo $showUpdate?>"><b>Ngày kết thúc KM::</b></p>
+														<p><b>Ngày kết thúc KM::</b></p>
 														<input type="date" name="date_end" class="form-control" value="<?php echo $info['date_end']?>">
 													</div>
 													<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 home">
@@ -237,6 +279,9 @@
 	    } else {
 	        false;
 	    }       
+	}
+	function showProductForCate(cate_id){
+		window.location.replace("stocker.php?cate_id=" + cate_id );
 	}
 </script>
 
