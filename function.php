@@ -170,9 +170,10 @@
 				if ($avatar_url != 'avatars/') {
 					$sql = "UPDATE users SET avatar_url= '$avatar_url', last_name = '$last_name', first_name = '$first_name', email = '$email', address = '$address', phone = '$phone', gender = '$gender', birthday = '$birthday' WHERE username = '$username'";
 					if ($connect->query($sql)) {
-						$_SESSION['avatar_url'] = $avatar_url;
-						echo "<script> alert('Update thành công');</script>";
-						header('Location: profile.php');
+						echo "<script>
+						 alert('Update thành công');
+						 window.location.replace('./profile.php');
+						</script>";
 					}
 				}else{
 					$sql = "UPDATE users SET last_name = '$last_name', first_name = '$first_name', email = '$email', address = '$address', phone = '$phone', gender = '$gender', birthday = '$birthday' WHERE username = '$username'";
@@ -420,7 +421,9 @@
 
 	function chooseImage($target, $name){
 		$target_dir = $target."/";
-		$target_file = $target_dir . basename($_FILES["$name"]["name"])."|";
+		if ($target == "avatars") {
+			$target_file = $target_dir . basename($_FILES["$name"]["name"]);
+		}else $target_file = $target_dir . basename($_FILES["$name"]["name"])."|";
 		$uploadOk = 1;
 		$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 
@@ -506,6 +509,8 @@
 		if ($connect) {
 			$sql = "SELECT orders.order_id, prod_id, quantity FROM ords_prods, orders WHERE ords_prods.order_id = orders.order_id AND username = '$username' AND orders.status = 0";
 			$result = $connect->query($sql);
+			$user = new user();
+			$infoUser = $user->showInfo($connect, $username);
 			$order_id = getOrderIDNotYetOrder($connect, $username);
 			if ($result->num_rows > 0) {
 				$_SESSION['order_id'] = $order_id;
@@ -561,15 +566,18 @@
 					if ($total=="") {
 						echo "<h3>CHƯA CÓ SẢN PHẨM TRONG GIỎ HÀNG</h3>";
 					}else{
-						echo "<div class='col-xs-6'>
-							 </div>
-							 <div class='col-xs-5 float-right' id='totalPrice'>
+						echo "<div class='col-xs-5'>
+									
+							 	</div>
+							 <div class='col-xs-7 float-right' id='totalPrice'>
 							 	<form method='POST' action=''>
-							 		<b>TỔNG TIỀN: </b>". number_format($total)."
+							 	<div id='address' class='col-sm-12' style = 'margin-bottom: 30px;'>
+			           	Địa chỉ giao hàng:
+			             <input type='text' name='address' class='form-control' placeholder='Địa chỉ giao hàng' value = '".$infoUser['address']."'>
+			           </div>
+							 		<b>TỔNG TIỀN: </b>". number_format($total)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							 		<button class = 'btn' type = 'submit' name='order'>ĐẶT HÀNG</button>
 							 	</form>
-							 </div>
-							 <div class='col-xs-2 float-right' id='totalPrice'>
-							 	
 							 </div>
 							 ";
 					}
@@ -586,7 +594,7 @@
 	function order($connect, $username, $order_address, $prod_id, $quantity){
 		if ($connect) {
 			$url = $_SESSION['last_url'];
-			$sql = "INSERT INTO orders(username, order_address, status) VALUES('$username', '$order_address', 1);";
+			$sql = "INSERT INTO orders(username, order_date, order_address, status) VALUES('$username', NOW(), '$order_address', 1);";
 			if ($connect->query($sql)) {
 				$order_id = $connect->insert_id;
 				$sql = "INSERT INTO ords_prods VALUES($order_id, '$prod_id', $quantity);";
@@ -600,7 +608,7 @@
 						 window.location.replace('..$url');
 						</script>";
 				}else echo "<script> alert('Có lỗi');</script>";
-			}else echo "<script> alert('Có lỗi đéo');</script>";
+			}else echo "<script> alert('Có lỗi');</script>";
 		}
 	}
 
@@ -728,19 +736,16 @@
 					if ($quantity>$info['quantity']) {
 						echo "<script>
 							 alert('Số Lượng Sản Phẩm Không Đủ');
-							 window.location.replace('..$url');
 							</script>";
 					}else {
 						$sql = "INSERT INTO ords_prods VALUES ('$order_id', '$prod_id', '$quantity')";
 						if ($connect->query($sql)) {
 							echo "<script>
 								 alert('Thêm vào giỏ hàng thành công');
-								 window.location.replace('..$url');
 								</script>";
 						}else {
 							echo "<script>
 								 alert('Đã xảy ra lỗi');
-								 window.location.replace('..$url');
 								</script>";
 							}
 					}
@@ -822,13 +827,13 @@
 
 	function showOrdered($connect, $username){
 		if ($connect) {
-			$sql = "SELECT order_id FROM orders WHERE username = '$username' AND status = 1 AND ship_date < NOW()";
+			$sql = "SELECT * FROM orders WHERE username = '$username' AND status = 1 AND ship_date < NOW()";
 			$result = $connect->query($sql);
 			if ($result->num_rows > 0) {
 				while($row = $result->fetch_assoc()) {
 					showProductInOrder($connect, $row['order_id']);
 
-					$total = totalPriceInOrder($connect, $order_id);
+					$total = totalPriceInOrder($connect, $row['order_id']);
 					echo "
 					<div class= 'col-xs-6'>
 					</div>
@@ -878,19 +883,23 @@
 			if ($result->num_rows > 0) {
 				while($row = $result->fetch_assoc()) {
 					showProductInOrder($connect, $row['order_id']);
+					if ($row['ship_date'] == "") {
+						$ship_date = " 2 - 3 ngày sau";
+					}else $ship_date = $row['ship_date'];
 					$total = totalPriceInOrder($connect, $row['order_id']);
 					$deleteUrl = "profile.php?order_id=".$row['order_id'];
 					echo "
-						<div class= 'col-xs-3'>
+						<div class= 'col-xs-4'>
+						Ngày Đặt Hàng: ".$row['order_date']. "
 						</div>
-						<div class= 'col-xs-3' style= 'color: red'>
-							Ngày Giao: ".$row['ship_date']. "
+						<div class= 'col-xs-4' style= 'color: red'>
+							Ngày Giao: $ship_date
 						</div>
 						<div class= 'col-xs-3'>
 							TỔNG TIỀN: ".number_format($total)."
 						</div>
-						<div class= 'col-xs-3'>
-							<a type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteUrl. "')\" ><i class = 'fa fa-trash-o fa-2x' style='color: red;'></i>HỦY</a>
+						<div class= 'col-xs-1'>
+							<a type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteUrl. "')\" ><i class = 'fa fa-trash-o fa-2x' style='color: red;'></i></a>
 						</div>
 						
 						<hr style = 'border: 1px solid #333333'>;
@@ -1068,5 +1077,36 @@
 	  if ($connect->query($sql)) {
 	    showCart($connect, $_SESSION['username']);
 	  }
+ 	}
+ 	function searchProductCate($connect, $cate_id, $price, $prod_name){
+ 		if ($connect) {
+ 			if ($price == "0") {
+ 				$str = "";
+ 			}else if ($price == "1") {
+ 				$str = "AND (price_out < 300000 OR new_price < 300000)";
+ 			}else if ($price == "2") {
+ 				$str = "AND (price_out BETWEEN 300000 AND 500000 OR new_price BETWEEN 300000 AND 500000)";
+ 			}else if ($price == "3") {
+ 				$str = "AND (price_out BETWEEN 500000 AND 750000 OR new_price BETWEEN 500000 AND 750000)";
+ 			}else if ($price == "4") {
+ 				$str = "AND (price_out BETWEEN 750000 AND 1000000 OR new_price BETWEEN 750000 AND 1000000)";
+ 			}else if ($price == "5") {
+ 				$str = "AND (price_out > 1000000 OR new_price > 1000000)";
+ 			}
+ 			$sql = "SELECT products.prod_id FROM products LEFT JOIN promotion ON products.prod_id = promotion.prod_id WHERE delete_at IS NULL AND prod_name LIKE '%$prod_name%' AND cate_id LIKE '%$cate_id%' ".$str;
+				$result = $connect->query($sql);
+				if ($result->num_rows > 0) {
+					while($row = $result->fetch_assoc()) {
+						$prod = new product();
+							$info = $prod->showProduct($connect, $row['prod_id']);
+							$image = explode("|", $info['image']);
+							$prod->showInfoProducthtml($row['prod_id'], $info['prod_name'], $image[0], $info['price_out'], $info['new_price']);
+					}
+				}else echo "
+					<div class = 'solugan'>
+					<h3>KHÔNG TÌM THẤY SẢN PHẨM NÀO</h3>
+					</div>
+					";
+ 		}
  	}
 ?>	

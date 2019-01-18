@@ -249,4 +249,5 @@ INSERT INTO `ords_prods`
         (2,'PD_05',1),
         (3,'PD_06',1),
         (1,'PD_07',1),
-        (2,'PD_08',1);    
+        (2,'PD_08',1); 
+SELECT * FROM products LEFT JOIN promotion ON products.prod_id = promotion.prod_id WHERE delete_at IS NULL AND prod_name LIKE '%%' AND cate_id LIKE '%CATE_03%'

@@ -1,9 +1,10 @@
 <?php 
 	session_start();
 	include "function.php";
+	$page = "profile";
 	$user = new user();
 	$info = $user->showInfo($connect, $_SESSION['username']);
-
+	$_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
 	$errConfirm = "";
 	$errOldPass = "";
 	if(isset($_POST['updatePass'])) {
@@ -15,7 +16,6 @@
 	}
 
 	if(isset($_POST['update'])) {
-		echo $_POST['file'];
 		$avatar_url = chooseImage("avatars", "file");
 		$user = new user();
 		$user->updateInfo($connect, $_SESSION['username'], $avatar_url, $_POST['last_name'], $_POST['first_name'], $_POST['email'], $_POST['address'], $_POST['phone'], $_POST['gender'], $_POST['birthday']);
@@ -73,7 +73,7 @@
 				<div class="info">
 					<div class="tab-content">
 						<div id="profile" class="tab-pane active">
-              				<h4>Hồ Sơ Của Tôi</h4>
+              <h4>Hồ Sơ Của Tôi</h4>
 							Quản Lí Thông Tin Hồ Sơ Để Bảo Mật
 							<hr>
 							<form method="POST" action="" enctype="multipart/form-data">
@@ -113,7 +113,7 @@
 							</form>
           	</div>
 
-	          <div id="changePass" class="tab-pane fade">
+	          <div id="changePass" class="tab-pane fade" style="height: 500px;">
 	            <h4>Đổi Mật Khẩu</h4>
 							Để Bảo Mật Tài Khoản Vui Lòng Không Chia Sẻ Mật Khẩu Với Người Khác
 							<hr>

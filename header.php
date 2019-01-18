@@ -24,6 +24,10 @@
   $username = "";
   $password = "";
   $remember = "";
+  $show = "hidden";
+  if (isset($page) && $page=="home" ){
+    $show= "show";
+  }
 
   if (isset($_COOKIE['username']) and isset($_COOKIE['password'])) {
     $username = $_COOKIE['username'];
@@ -69,124 +73,156 @@
   }
  ?>
 <div id="header">
-      <div class="header-top">
-        <div class="container">
-          <div class="header-left col-lg-5 col-md-5 col-sm-6 col-xs-6">
-            <div class="info">
-              <span>
-              <i class="glyphicon glyphicon-cloud"></i>
-              27°C
-              </span>
-              <span>
-                <i class="glyphicon glyphicon-map-marker"></i>
-                101B Lê Hữu Trác
-              </span>
-              <span>
-                <i class="glyphicon glyphicon-earphone"></i>
-                +84 648 534 343
-              </span>
-            </div>
-          </div>
-          <div class="col-lg-2 col-md-1 col-sm-0 col-xs-0">
-            
-          </div>
-          <div class="header-right col-lg-5 col-md-6 col-sm-6 col-xs-6">
-            <ul class="nav navbar-nav" id="header-right">
-              <li>
-                <a href="" data-toggle="modal" data-target="#dangki"><span><i class="fa fa-bell-o "></i></span> THÔNG BÁO </a>
-              </li>
-              <li>
-                <a href="" data-toggle="modal" data-target="#dangki">
-                  <span>
-                    <i class="fa fa-question-circle  "></i>
-                  </span>TRỢ GIÚP
-                </a>
-              </li>
-              <li class="<?php echo $showDangki_Dangnhap?>">
-                <a href="" data-toggle="modal" data-target="#dangki">
-                  <span>
-                    <i class="fa fa-user-plus "></i>
-                  </span> ĐĂNG KÍ
-                </a>
-              </li>
-              <li class="<?php echo $showDangki_Dangnhap?>">
-                <a href="" data-toggle="modal" data-target="#dangnhap">
-                  <span>
-                    <i class="fa fa-sign-in"></i>
-                  </span> ĐĂNG NHẬP
-                </a>
-              </li>
-              <li><a href="cart.php"><span><i class="fa fa-shopping-cart fa-2x <?php echo $showUsername;?>"><sup><?php echo $_SESSION['totalQuantity']; ?></sup></i></span></a></li>
-              <li class="dropdown" class="<?php echo $showUsername;?>">
-                  <a href="#" id="user" class="<?php echo $showUsername;?> ?>" data-toggle="dropdown">
-                    <img class="img-circle" width="15" height="15" src="<?php echo $avatar ?>">
-                    <?php echo $username; ?>
-                  </a>
-                  <ul class="dropdown-menu text-capitalize" role="menu">
-                    <li><a href="profile.php"><span><i class="fa fa-user-circle-o"></i></span> Tài khoản của tôi</a></li>
-                    <li><a href="logout.php"><span><i class="fa fa-sign-out"></i></span> Đăng xuất</a></li>
-                  </ul>
-              </li>
-                          
-            </ul>
-          </div>
-
+  <div class="header-top">
+    <div class="container">
+      <div class="header-left col-lg-5 col-md-5 col-sm-6 col-xs-6">
+        <div class="info">
+          <span>
+          <i class="glyphicon glyphicon-cloud"></i>
+          27°C
+          </span>
+          <span>
+            <i class="glyphicon glyphicon-map-marker"></i>
+            101B Lê Hữu Trác
+          </span>
+          <span>
+            <i class="glyphicon glyphicon-earphone"></i>
+            +84 648 534 343
+          </span>
         </div>
       </div>
-      
-      <div class="header-content">
-        <div class="container">
-          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6 logo">
-            <img src="Image/logo.png" width="120px" height="100px">
-          </div>
-          <div class="solugan col-lg-6 col-md-6 col-sm-6 col-xs-6">
-            <h3>PHONG ĐỘ LÀ TỨC THỜI. ĐẲNG CẤP LÀ MÃI MÃI</h3>
-          </div>
-          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-0 ship" style="float: left;">
-            <img src="Image/ship.png" width="200px" height="100px">
-          </div>
-        </div>
+      <div class="col-lg-2 col-md-1 col-sm-0 col-xs-0">
+        
       </div>
-      <div class="header-menu text-uppercase" id="myMenu">
-        <nav class="navbar navbar-default">
-          <div class="container">
-            <div class="navbar-header">
-              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span> 
-              </button>
-            </div>
-            <div class="collapse navbar-collapse" id="myNavbar">
-              <ul class="nav navbar-nav">
-                <li class="dropdown "> 
-                  <a href="#" id="category" class="dropdown-toggle" data-toggle="dropdown"><span class="fa fa-bars "></span>  DANH MỤC SẢN PHẨM</a>
-                  <ul class="dropdown-menu text-capitalize" role="menu">
-                    <?php
-                      $product = new product();
-                      $product->showCategorya($connect); 
-                    ?>
-                  </ul>
-                </li>
-                <li class="<?php if (isset($page) && $page == 'home' ) {
-                  echo "active"; } ?>"><a href="home.php">TRANG CHỦ</span></a></li>
-                <li class="<?php if (isset($page) && $page == 'product' ) {
-                  echo "active"; } ?>"><a href="product.php">SẢN PHẨM </a></li>
-                <li><a href="#">LIÊN HỆ </span></a></li>
-                <li class="<?php echo $showSwitch; ?>"><a href="administrator.php"><i class="fa fa-hand-o-right"></i> ĐẾN ADMIN </span></a></li>
-                <li>
-                <form method="post" class="navbar-form">
-                  <div class="input-group search-box">
-                    <input type="text" class="form-control" placeholder="Search here...">
-                    <span class="input-group-addon btn btn-primary"> <i class="glyphicon glyphicon-search"></i> </span>
-                  </div>
-                </form>
-              </li>      
+      <div class="header-right col-lg-5 col-md-6 col-sm-6 col-xs-6">
+        <ul class="nav navbar-nav" id="header-right">
+          <li>
+            <a href="" data-toggle="modal" data-target="#dangki"><span><i class="fa fa-bell-o "></i></span> THÔNG BÁO </a>
+          </li>
+          <li>
+            <a href="" data-toggle="modal" data-target="#dangki">
+              <span>
+                <i class="fa fa-question-circle  "></i>
+              </span>TRỢ GIÚP
+            </a>
+          </li>
+          <li class="<?php echo $showDangki_Dangnhap?>">
+            <a href="" data-toggle="modal" data-target="#dangki">
+              <span>
+                <i class="fa fa-user-plus "></i>
+              </span> ĐĂNG KÍ
+            </a>
+          </li>
+          <li class="<?php echo $showDangki_Dangnhap?>">
+            <a href="" data-toggle="modal" data-target="#dangnhap">
+              <span>
+                <i class="fa fa-sign-in"></i>
+              </span> ĐĂNG NHẬP
+            </a>
+          </li>
+          <li><a href="cart.php"><span><i class="fa fa-shopping-cart fa-2x <?php echo $showUsername;?>"><sup><?php echo $_SESSION['totalQuantity']; ?></sup></i></span></a></li>
+          <li class="dropdown" class="<?php echo $showUsername;?>">
+              <a href="#" id="user" class="<?php echo $showUsername;?> ?>" data-toggle="dropdown">
+                <img class="img-circle" width="15" height="15" src="<?php echo $avatar ?>">
+                <?php echo $username; ?>
+              </a>
+              <ul class="dropdown-menu text-capitalize" role="menu">
+                <li><a href="profile.php"><span><i class="fa fa-user-circle-o"></i></span> Tài khoản của tôi</a></li>
+                <li><a href="logout.php"><span><i class="fa fa-sign-out"></i></span> Đăng xuất</a></li>
               </ul>
-            </div>
-          </div>
-        </nav>
+          </li>
+                      
+        </ul>
       </div>
+
+    </div>
+  </div>
+  
+  <div class="header-content">
+    <div class="container">
+      <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6 logo">
+        <img src="Image/logo.png" width="120px" height="100px">
+      </div>
+      <div class="solugan col-lg-6 col-md-6 col-sm-6 col-xs-6">
+        <h3>PHONG ĐỘ LÀ TỨC THỜI. ĐẲNG CẤP LÀ MÃI MÃI</h3>
+      </div>
+      <div class="col-lg-3 col-md-3 col-sm-3 col-xs-0 ship" style="float: left;">
+        <img src="Image/ship.png" width="200px" height="100px">
+      </div>
+    </div>
+  </div>
+  <div class="header-menu text-uppercase" id="myMenu">
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span> 
+          </button>
+        </div>
+        <div class="collapse navbar-collapse" id="myNavbar">
+          <ul class="nav navbar-nav">
+            <li class="dropdown "> 
+              <a href="#" id="category" class="dropdown-toggle" data-toggle="dropdown"><span class="fa fa-bars "></span>  DANH MỤC SẢN PHẨM</a>
+              <ul class="dropdown-menu text-capitalize" role="menu">
+                <?php
+                  $product = new product();
+                  $product->showCategorya($connect); 
+                ?>
+              </ul>
+            </li>
+            <li class="<?php if (isset($page) && $page == 'home' ) {
+              echo "active"; } ?>"><a href="home.php">TRANG CHỦ</span></a></li>
+            <li class="<?php if (isset($page) && $page == 'product' ) {
+              echo "active"; } ?>"><a href="product.php">SẢN PHẨM </a></li>
+            <li><a href="#">LIÊN HỆ </span></a></li>
+            <li class="<?php echo $showSwitch; ?>"><a href="administrator.php"><i class="fa fa-hand-o-right"></i> ĐẾN ADMIN </span></a></li>
+            <li>
+            <form method="post" class="navbar-form">
+              <div class="input-group search-box">
+                <input type="text" class="form-control" placeholder="Search here...">
+                <span class="input-group-addon btn btn-primary"> <i class="glyphicon glyphicon-search"></i> </span>
+              </div>
+            </form>
+          </li>      
+          </ul>
+        </div>
+      </div>
+      <div class="filter <?php echo $show ?>" style="height: 45px; background: #a6a6a6; padding: 5px 0px 5px 0px;">
+        <div class="container">
+          <form method="POST" action="">
+            <div class="col-xs-3">
+              <select class="form-control" name="cate_id">
+                <option value="">Danh Mục</option>
+                <?php 
+                  $product = new product();
+                  $product->showCategoryOption($connect,$info['cate_name']); 
+                ?>
+              </select>
+            </div>
+            <div class="col-xs-3">
+              <select class="form-control" name="price">
+                <option value="0">Khoảng giá</option>
+                <option value="1"> < 300.000đ</option>
+                <option value="2">300.000đ - 500.000đ</option>
+                <option value="3">500.000đ - 750.000đ</option>
+                <option value="4">750.000đ - 1.000.000đ</option>
+                <option value="5"> > 1.000.000đ</option>
+              </select>
+            </div>
+            <div class="col-xs-3">
+              <input type="text" name="prod_name" placeholder="Tên sản phẩm" class="form-control">
+            </div>
+            <div class="col-xs-2">
+              <button class="btn" type="submit" name="search" ><i class="fa fa-search fa-fw"></i>Tìm kiếm</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </nav>
+    
+  </div>
 </div>
 <div id="dangki" class="modal fade" role="dialog">
       <div class="modal-dialog">

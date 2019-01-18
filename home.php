@@ -4,7 +4,7 @@
 	include "function.php";
 	$page = "home";
 	if (isset($_GET['addProd_id'])) {
-		if (!isset($_SESSION['username'])) {
+		if (!isset($_SESSION['username'])){
 			echo "
 			<script>
 			 alert('Vui Lòng Đăng Nhập');
@@ -13,6 +13,7 @@
 		}else
 		addToCart($connect, $_SESSION['username'], $_GET['addProd_id'], 1);
 	}
+	
    ?>
 <!DOCTYPE html>
 <html>
@@ -61,6 +62,28 @@
 	    </a>
 		</div>
 		<div class="container">
+			<?php 
+				if (isset($_POST['search'])) {
+					echo "
+					<div class='productHot'>
+						<div class='row'>
+							<div class='solugan'>
+								<div class='box-product-head'>
+									<span class='box-title'>
+										KẾT QUẢ TÌM KIẾM
+									</span>
+									<span class='af-ter'>
+										
+									</span>
+								</div>
+							</div>
+					";
+					searchProductCate($connect, $_POST['cate_id'], $_POST['price'], $_POST['prod_name']);
+					echo "
+						</div>
+					</div>";
+				}
+			 ?>
 			<div class="productHot">
 				<div class="row">
 					<div class="solugan">

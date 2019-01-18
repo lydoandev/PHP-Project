@@ -1,6 +1,7 @@
 <?php
 	session_start();
 	include "function.php";
+	$page = "cart";
 	$url = $_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
 	if (isset($_GET['deleteProd_id'])) {
 	 	$sql = "DELETE FROM ords_prods WHERE order_id = '".$_GET['deleteOrder_id']."' AND prod_id = '". $_GET['deleteProd_id']."'";
@@ -12,6 +13,19 @@
 	  } elseif ($_GET['action'] == 'plus') {
 	    updateQuantityOnOrder($connect, $_GET['order_id'], $_GET['prod_id'], "plus");
 	  }
+	}
+	if (isset($_POST['order'])) {
+		$address = $_POST['address'];
+		$order_id = getOrderIDNotYetOrder($connect, $_SESSION['username']);
+		$sql = "UPDATE orders SET status = 1, order_address = '$address', order_date = NOW() WHERE order_id = '$order_id';";
+		if ($connect->query($sql)) {
+			echo "<script>
+			 alert('Đặt hàng thành công');
+			 window.location.replace('./cart.php');
+			</script>";
+		}else echo "<script>
+			 alert('Có lỗi');
+			</script>";
 	}
 ?>
 <!DOCTYPE html>
@@ -32,7 +46,7 @@
 		include "header.php";
 	 ?>
 	<div class="content">
-		<div class="container" style="height: 700px; margin-top: 250px;">
+		<div class="container" style="margin-top: 250px; margin-bottom:50px;">
 			<div class="solugan">
 				<h3 class="text-center"><span><i class="fa fa-shopping-cart fa-2x"></i></span> GIỎ HÀNG CỦA BẠN </h3>
 			</div>
