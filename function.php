@@ -217,16 +217,6 @@
 	 */
 	class product
 	{
-
-		function changeViews($connect, $prod_id){
-			if ($connect) {
-				$info = $this->showProduct($connect, $prod_id);
-				$views = $info['views'] + 1;
-				$sql = "UPDATE products SET views = '$views' WHERE prod_id = '$prod_id'";
-				$connect->query($sql);
-			}
-		}
-
 		function showCategoryOption($connect, $selected){
 			$sql = "SELECT * FROM categories WHERE delete_at IS NULL";
 			$result = $connect->query($sql);
@@ -239,6 +229,18 @@
 				}
 			}
 		}
+
+		
+
+		function changeViews($connect, $prod_id){
+			if ($connect) {
+				$info = $this->showProduct($connect, $prod_id);
+				$views = $info['views'] + 1;
+				$sql = "UPDATE products SET views = '$views' WHERE prod_id = '$prod_id'";
+				$connect->query($sql);
+			}
+		}
+
 
 		function showCategorya($connect){
 			$sql = "SELECT * FROM categories WHERE delete_at IS NULL";
