@@ -16,7 +16,7 @@
 			<div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
 				<h4>GIỚI THIỆU</h4>
 				<hr>
-				<p class="title">NỘI THẤT FUNI</p>
+				<p class="title">ĐỒ DA NAM CAO CẤP LEONARDO</p>
 				<p class="title">Địa chỉ: </p><span>A12, Đinh Tiên Hoàng, Q.Hoàn Kiếm, Hà Nội</span>
 				<p class="title">Giấy chứng nhận kinh doanh: </p><span>Số 012345678 do phường đăng kí kinh doanh, sở kế hoạch và đàu tư thành phố Hà Nội cấp</span>
 			</div>

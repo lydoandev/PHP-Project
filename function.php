@@ -245,7 +245,7 @@
 			$result = $connect->query($sql);
 			if ($result->num_rows > 0) {
 			while($row = $result->fetch_assoc()) {
-					echo "<li><a href='".$row['cate_id'].".php'>". $row['cate_name']. "</a></li>";
+					echo "<li><a href='productByCate.php?cate_id=".$row['cate_id']."&cate_name=".$row['cate_name']."'>". $row['cate_name']. "</a></li>";
 				}
 			}
 		}

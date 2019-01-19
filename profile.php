@@ -9,9 +9,13 @@
 	$errOldPass = "";
 	if(isset($_POST['updatePass'])) {
 		$user = new user();
-		$errOldPass = $user->updatePassword($connect, $_SESSION['username'], $_POST['oldPassword'], $_POST['newPassword']);
+
 		if ($_POST['newPassword'] != $_POST['confirmPassword']) {
+			echo "<script> alert('Nhập Lại Mật Khẩu Không Chính Xác');</script>";
 			$errConfirm = "* Nhập Lại Mật Khẩu Không Chính Xác";
+		}else {
+			$errOldPass = $user->updatePassword($connect, $_SESSION['username'], $_POST['oldPassword'], $_POST['newPassword']);
+			echo "<script> alert('Mật Khẩu Cũ Không Chính Xác');</script>";
 		}
 	}
 
