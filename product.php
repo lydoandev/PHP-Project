@@ -2,7 +2,7 @@
 <?php
 	session_start();
 	include "function.php";
-	$page = "product";
+	$_SESSION['page'] = "product";
 	if (isset($_GET['addProd_id'])) {
 		if (!isset($_SESSION['username'])) {
 			echo "
@@ -10,8 +10,10 @@
 			 alert('Vui Lòng Đăng Nhập');
 			 window.location.replace('./home.php');
 			</script>";
-		}else
-		addToCart($connect, $_SESSION['username'], $_GET['addProd_id'], 1);
+		}else{
+			$_SESSION['last_url'] = "product.php";
+			addToCart($connect, $_SESSION['username'], $_GET['addProd_id'], 1);
+		}
 	}
    ?>
 <!DOCTYPE html>

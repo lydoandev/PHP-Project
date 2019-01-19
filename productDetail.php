@@ -1,7 +1,7 @@
 <?php
 	session_start();
 	 include "function.php";
-
+	 $_SESSION['page'] ="productDetail";
 	 $info = array();
 	 $url = $_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
 	if (isset($_GET['prod_id'])) {
@@ -27,8 +27,10 @@
 			 alert('Vui Lòng Đăng Nhập');
 			 window.location.replace('$url');
 			</script>";
-		}else
-		addToCart($connect, $_SESSION['username'], $_GET['prod_id'], $_POST['quantity']);
+		}else{
+			addToCart($connect, $_SESSION['username'], $_GET['prod_id'], $_POST['quantity']);	
+		}
+
 	}
 
 	if (isset($_SESSION['username'])) {

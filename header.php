@@ -25,7 +25,7 @@
   $password = "";
   $remember = "";
   $show = "hidden";
-  if (isset($page) && $page=="home" ){
+  if (isset($_SESSION['page']) && $_SESSION['page']=="home" ){
     $show= "show";
   }
 
@@ -123,7 +123,7 @@
           <li><a href="cart.php"><span><i class="fa fa-shopping-cart fa-2x <?php echo $showUsername;?>"><sup><?php echo $_SESSION['totalQuantity']; ?></sup></i></span></a></li>
           <li class="dropdown" class="<?php echo $showUsername;?>">
               <a href="#" id="user" class="<?php echo $showUsername;?> ?>" data-toggle="dropdown">
-                <img class="img-circle" width="15" height="15" src="<?php echo $avatar ?>">
+                <img class="img-circle" width="15" height="15" src="<?php echo $_SESSION['avatar_url']; ?>">
                 <?php echo $username; ?>
               </a>
               <ul class="dropdown-menu text-capitalize" role="menu">
@@ -172,9 +172,9 @@
                 ?>
               </ul>
             </li>
-            <li class="<?php if (isset($page) && $page == 'home' ) {
+            <li class="<?php if (isset($_SESSION['page']) && $_SESSION['page'] == 'home' ) {
               echo "active"; } ?>"><a href="home.php">TRANG CHỦ</span></a></li>
-            <li class="<?php if (isset($page) && $page == 'product' ) {
+            <li class="<?php if (isset($_SESSION['page']) && $_SESSION['page'] == 'product' ) {
               echo "active"; } ?>"><a href="product.php">SẢN PHẨM </a></li>
             <li><a href="#">LIÊN HỆ </span></a></li>
             <li class="<?php echo $showSwitch; ?>"><a href="administrator.php"><i class="fa fa-hand-o-right"></i> ĐẾN ADMIN </span></a></li>
@@ -314,7 +314,7 @@
   var sticky = header.offsetTop;
 
   function scrollMenu() {
-    if (window.pageYOffset > sticky) {
+    if (window.$_SESSION['page']YOffset > sticky) {
       header.classList.add("sticky");
     } else {
       header.classList.remove("sticky");

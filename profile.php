@@ -1,9 +1,10 @@
 <?php 
 	session_start();
 	include "function.php";
-	$page = "profile";
+	$_SESSION['page'] = "profile";
 	$user = new user();
 	$info = $user->showInfo($connect, $_SESSION['username']);
+	$_SESSION['avatar_url'] = $info['avatar_url'];
 	$_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
 	$errConfirm = "";
 	$errOldPass = "";
@@ -15,7 +16,9 @@
 			$errConfirm = "* Nhập Lại Mật Khẩu Không Chính Xác";
 		}else {
 			$errOldPass = $user->updatePassword($connect, $_SESSION['username'], $_POST['oldPassword'], $_POST['newPassword']);
-			echo "<script> alert('Mật Khẩu Cũ Không Chính Xác');</script>";
+			if ($errOldPass !="") {
+				echo "<script> alert('Mật Khẩu Cũ Không Chính Xác');</script>";
+			}
 		}
 	}
 
@@ -52,7 +55,7 @@
 				<div class="acount">
 					<div class="row">
 						<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-							<img src="<?php echo $avatar ?>">
+							<img src="<?php echo $info['avatar_url']; ?>">
 						</div>
 						<div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
 							<p style="padding-top: 10px;"><b><?php echo $username; ?></b></p>

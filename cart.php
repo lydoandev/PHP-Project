@@ -1,7 +1,7 @@
 <?php
 	session_start();
 	include "function.php";
-	$page = "cart";
+	$_SESSION['page'] = "cart";
 	$url = $_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
 	if (isset($_GET['deleteProd_id'])) {
 	 	$sql = "DELETE FROM ords_prods WHERE order_id = '".$_GET['deleteOrder_id']."' AND prod_id = '". $_GET['deleteProd_id']."'";

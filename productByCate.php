@@ -2,7 +2,7 @@
 <?php
 	session_start();
 	include "function.php";
-	$page = "product";
+	$_SESSION['page'] = "productByCate";
 	if (isset($_GET['addProd_id'])) {
 		if (!isset($_SESSION['username'])) {
 			echo "
@@ -10,8 +10,10 @@
 			 alert('Vui Lòng Đăng Nhập');
 			 window.location.replace('./home.php');
 			</script>";
-		}else
-		addToCart($connect, $_SESSION['username'], $_GET['addProd_id'], 1);
+		}else{
+			$_SESSION['last_url'] = "productByCate.php";
+			addToCart($connect, $_SESSION['username'], $_GET['addProd_id'], 1);
+		}
 	}
 	if (isset($_GET['cate_id'])) {
 		$cate_id = $_GET['cate_id'];

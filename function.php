@@ -178,6 +178,7 @@
 				}else{
 					$sql = "UPDATE users SET last_name = '$last_name', first_name = '$first_name', email = '$email', address = '$address', phone = '$phone', gender = '$gender', birthday = '$birthday' WHERE username = '$username'";
 					if ($connect->query($sql)) {
+						$_SESSION['avatar_url'] = $avatar_url;
 						echo "<script>
 						 alert('Update thành công');
 						 window.location.replace('./profile.php');
@@ -300,6 +301,7 @@
 
 		function showInfoProducthtml($prod_id, $name, $image, $price, $new_price){
 			$show = "show";
+			$page = $_SESSION['page'];
 			if ($new_price == '') {
 				$show = "hidden";
 				$percent = 0;
@@ -320,7 +322,7 @@
 						</div>
 						<div class='product-control text-center'>
 							<button class='btn'>
-								<a href='home.php?addProd_id=" . $prod_id . "'><i class = 'fa fa-cart-plus fa-lg' style='color: #FFF;'></i> Giỏ hàng
+								<a href='$page.php?addProd_id=" . $prod_id . "'><i class = 'fa fa-cart-plus fa-lg' style='color: #FFF;'></i> Giỏ hàng
 							</button>
 							<button class='btn'>
 								<a href='productDetail.php?prod_id=" . $prod_id . "'><i class = 'fa fa-eye' style='color: #FFF;'></i></a>
@@ -758,7 +760,7 @@
 						if ($quantity>$info['quantity']) {
 							echo "<script>
 								 alert('Số Lượng Sản Phẩm Không Đủ');
-								 window.location.replace('..$url');
+								 window.location.replace('$url');
 								</script>";
 						}
 						else {
@@ -766,12 +768,12 @@
 							if ($connect->query($sql)) {
 								echo "<script>
 									 alert('Thêm vào giỏ hàng thành công');
-									 window.location.replace('..$url');
+									 window.location.replace('$url');
 									</script>";
 							}else {
 								echo "<script>
 									 alert('Đã xảy ra lỗi');
-									 window.location.replace('..$url');
+									 window.location.replace('$url');
 									</script>";
 							}
 						}
@@ -780,7 +782,7 @@
 						if ($quantity>$info['quantity']) {
 							echo "<script>
 								 alert('Số Lượng Sản Phẩm Không Đủ');
-								 window.location.replace('..$url');
+								 window.location.replace('$url');
 								</script>";
 						}
 						else {
@@ -788,7 +790,7 @@
 							if ($connect->query($sql)) {
 								echo "<script>
 									 alert('Thêm vào giỏ hàng thành công');
-									 window.location.replace('..$url');
+									 window.location.replace('$url');
 									</script>";
 							}
 						}
