@@ -88,6 +88,9 @@
 						}
 					?>
 				</div>
+				<div class="viewMore text-center" style="padding-top: 40px;">
+					<a href="productByCate.php?cate_id=CATE_02&cate_name=Ví Da"><button class="btn">XEM THÊM</button></a>
+				</div>
 			</div>
 
 			<div class="productHotSell">
@@ -115,6 +118,9 @@
 						}
 					?>
 				</div>
+				<div class="viewMore text-center" style="padding-top: 40px;">
+					<a href="productByCate.php?cate_id=CATE_01&cate_name=Túi & Clutch"><button class="btn">XEM THÊM</button></a>
+				</div>
 			</div>
 
 			<div class="productPromotion">
@@ -141,6 +147,9 @@
 							}
 						}
 					?>
+				</div>
+				<div class="viewMore text-center" style="padding-top: 40px;">
+					<a href="productByCate.php?cate_id=CATE_03&cate_name=Phụ Kiện"><button class="btn">XEM THÊM</button></a>
 				</div>
 			</div>
 			

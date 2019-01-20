@@ -47,12 +47,13 @@
 	}
 
 	if (isset($_POST['add'])) {
+		$user = new user();
+		$avatar_url = chooseImage('avatars', 'file');
+		$user->insert_user($connect, $_POST['last_name'], $_POST['first_name'], $_POST['email'], $_POST['address'], $_POST['phone'], $_POST['gender'], $_POST['birthday'],$_POST['username'], $_POST['password'],$avatar_url, $_POST['u_role'],"admin");
+		
 		echo "<script>
 			 alert('Thêm Thành Công Tài Khoản');
 			 </script>";
-		$user = new user();
-		$avatar_url = chooseImage();
-		$user->insert_user($connect, $_POST['last_name'], $_POST['first_name'], $_POST['email'], $_POST['address'], $_POST['phone'], $_POST['gender'], $_POST['birthday'],$_POST['username'], $_POST['password'],$avatar_url, $_POST['u_role'],"admin");
 	}	
 
 	if (isset($_POST['update'])) {
@@ -122,7 +123,7 @@
 				  <ul role="tablist" class="">
 				  	 <li><a href=""><span><i class="fa fa-home" style="color: #ff661a;"></i></span> Trang chủ Admin</a></li>
 		             <li class="active">
-		               <a href="qluser.php"><span><i class="fa fa-address-card-o" style="color: #a31aff;"></i></span> Quản lí khách hàng</a>
+		               <a href="#"><span><i class="fa fa-address-card-o" style="color: #a31aff;"></i></span> Quản lí khách hàng</a>
 		             </li>
 		             <li>
 		               <a href="home.php"><span><i class="fa fa-user-circle-o" style="color: #c51a1d;"></i></span> Hoạt động như user bình thường</a>

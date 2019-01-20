@@ -57,6 +57,7 @@ CREATE TABLE orders(
     ship_id VARCHAR(10),
     order_date DATE,
     ship_date DATE,
+	delete_date DATE,
     order_address VARCHAR(255),
     status BOOLEAN,
     FOREIGN KEY (username) REFERENCES users (username),
@@ -70,7 +71,6 @@ CREATE TABLE categories(
     delete_at date
 );
 
-SELECT order_id FROM orders WHERE username = '' AND status = 0;
 
 CREATE TABLE products(
 	prod_id VARCHAR(10) PRIMARY KEY,

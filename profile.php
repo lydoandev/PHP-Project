@@ -162,11 +162,14 @@
 	          <div id="order" class="tab-pane fade">
 	            <div class="tablist row">
 		            <ul role="tablist" class="nav nav-tabs small">
-		              <li class=" nav-item active col-lg-6 col-md-6 col-sm-6 col-xs-6">
+		              <li class=" nav-item active col-lg-4 col-md-4 col-sm-4 col-xs-4">
 		                <a href="#ordering" data-toggle="tab" aria-expanded="true"><h4>Đang Giao</h4></a>
 		              </li>
-		              <li class="nav-item col-lg-6 col-md-6 col-sm-6 col-xs-6">
+		              <li class="nav-item col-lg-4 col-md-4 col-sm-4 col-xs-4">
 		                <a href="#ordered" data-toggle="tab" aria-expanded="true"><h4><h4>Đã Giao</h4></a>
+		              </li>
+		              <li class="nav-item col-lg-4 col-md-4 col-sm-4 col-xs-4">
+		                <a href="#orderCancel" data-toggle="tab" aria-expanded="true"><h4><h4>Đã Hủy</h4></a>
 		              </li>
 		            </ul>
 		          </div>
@@ -178,6 +181,9 @@
 
 		            <div id="ordered" class="tab-pane fade">
 		              <?php showOrdered($connect, $_SESSION['username']); ?>
+		            </div>
+		            <div id="orderCancel" class="tab-pane fade">
+		              <?php showOrderCancel($connect, $_SESSION['username']); ?>
 		            </div>
 		          </div>
 	          </div>

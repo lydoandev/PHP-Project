@@ -3,25 +3,24 @@
 	 include "function.php";
 	 $_SESSION['page'] ="productDetail";
 	 $info = array();
-	 $url = $_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
 	if (isset($_GET['prod_id'])) {
-	 	$show = "hidden";
+	  $url = $_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
 	 	$prod = new product();
 	 	$prod->changeViews($connect, $_GET['prod_id']);
 	 	$info = $prod->showProduct($connect, $_GET['prod_id']);
 	 	$cate_name = $info['cate_name'];
 	 	$image = explode("|", $info['image']);
 	 	if ($info['new_price'] == "") {
-	 		$show = "hidden";
+	 		$showPromotion = "hidden";
 	 		$percent = 0;
 	 		$info['new_price'] = $info['price_out'];
 	 	}else {
 	 		$percent = round(($info['price_out'] - $info['new_price'])/($info['price_out']/100), 0);
-			$show = "show";
+			$showPromotion = "show";
 	 	}
   }
 	if (isset($_POST['addCart'])) {
-		if (!isset($_SESSION['username'])) {
+		if (!isset($_SESSION['username'])) { 
 		echo "
 			<script>
 			 alert('Vui Lòng Đăng Nhập');
@@ -31,6 +30,18 @@
 			addToCart($connect, $_SESSION['username'], $_GET['prod_id'], $_POST['quantity']);	
 		}
 
+	}
+
+	if (isset($_GET['addProd_id'])) {
+		if (!isset($_SESSION['username'])) {
+			echo "
+			<script>
+			 alert('Vui Lòng Đăng Nhập');
+			 window.location.replace('./home.php');
+			</script>";
+		}else{
+			addToCart($connect, $_SESSION['username'], $_GET['addProd_id'], 1);
+		}
 	}
 
 	if (isset($_SESSION['username'])) {
@@ -48,9 +59,6 @@
 		} else {
 			order($connect, $_SESSION['username'], $_POST['address'], $_GET['prod_id'], $_POST['quantity']);
 		}
-	}
-	if (isset($_POST['ok'])) {
-		
 	}
 ?>
 <!DOCTYPE html>
@@ -71,6 +79,7 @@
 	<?php 
 		include "header.php";
 	 ?>
+
 	<div class="content">
 		<div class="container">
 			<div class="productDetail" style="margin: 50px 0px 50px 0px;">
@@ -138,10 +147,10 @@
 									<?php echo number_format($info['new_price']); ?> đ
 								</div>
 								<div class="col-xs-3">
-									<s  class="<?php echo $show; ?>" style="color: red;"><?php echo number_format($info['price_out']); ?> đ</s>
+									<s  class="<?php echo $showPromotion; ?>" style="color: red;"><?php echo number_format($info['price_out']); ?> đ</s>
 								</div>
 								<div class="col-xs-2">
-									<span style="background: #c51a1d;" class="<?php echo $show; ?>"><i class="fa fa-sort-amount-desc"></i><?php echo $percent; ?>%</span>
+									<span style="background: #c51a1d;" class="<?php echo $showPromotion; ?>"><i class="fa fa-sort-amount-desc"></i><?php echo $percent; ?>%</span>
 								</div>
 							</div>
 								<hr>

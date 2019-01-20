@@ -17,15 +17,28 @@
 	if (isset($_POST['order'])) {
 		$address = $_POST['address'];
 		$order_id = getOrderIDNotYetOrder($connect, $_SESSION['username']);
-		$sql = "UPDATE orders SET status = 1, order_address = '$address', order_date = NOW() WHERE order_id = '$order_id';";
-		if ($connect->query($sql)) {
-			echo "<script>
-			 alert('Đặt hàng thành công');
-			 window.location.replace('./cart.php');
-			</script>";
-		}else echo "<script>
-			 alert('Có lỗi');
-			</script>";
+		$sql = "SELECT prod_id FROM ords_prods WHERE order_id = $order_id";
+			$result = $connect->query($sql);
+			if ($result->num_rows > 0) {
+				while($row = $result->fetch_assoc()) {
+					$prod = new product();
+					$info = $prod->showProduct($connect, $row['prod_id']);
+					$updateQuantity = $info['quantity'] - getQuantityProductInOrder($connect, $order_id, $row['prod_id']);
+					$sql = "UPDATE products SET quantity = $updateQuantity WHERE prod_id = '".$row['prod_id']. "'";
+					$connect->query($sql);
+				}
+				$sql = "UPDATE orders SET status = 1, order_address = '$address', order_date = NOW() WHERE order_id = '$order_id';";
+				if ($connect->query($sql)) {
+					echo "<script>
+					 alert('Đặt hàng thành công');
+					 window.location.replace('./cart.php');
+					</script>";
+				}else 
+					echo "<script>
+					 alert('Có lỗi');
+					</script>";
+			}
+		
 	}
 ?>
 <!DOCTYPE html>
@@ -72,8 +85,10 @@
 </script>
 </html>
 <?php 
- foreach ($_SESSION['ajaxs'] as $prod_id) {
-   changeQuantityControl($_SESSION['order_id'], $prod_id);
- }
- unset($_SESSION['ajaxs']);
+if (isset($_SESSION['ajaxs'])) {
+	foreach ($_SESSION['ajaxs'] as $prod_id) {
+	   changeQuantityControl($_SESSION['order_id'], $prod_id);
+	 }
+	 unset($_SESSION['ajaxs']);
+}
 ?> 

@@ -221,9 +221,9 @@
 														<p><b>Số Lượng:</b></p>
 														<input type="text" name="quantity" class="form-control" value="<?php echo $info['quantity']?>" placeholder = "Số Lượng">
 													</div>
-													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home">
+													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home  <?php echo $showUpdate ?>">
 														<p><b>Ngày Nhập:</b></p>
-														<input type="date" name="date_add" class="form-control <?php echo $showUpdate ?>" value="<?php echo $info['date_add']?>">
+														<input type="date" name="date_add" class="form-control" value="<?php echo $info['date_add']?>">
 													</div>
 													<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 home <?php echo $showUpdate?>">
 														<p><b>Tình Trạng:</b></p>

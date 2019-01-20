@@ -19,7 +19,8 @@
   $errUserName = "";
   $errConfirmpassword = "";
   $showDangki_Dangnhap = "show";
-  $showSwitch = "hidden";
+  $showAdmin = "hidden";
+  $showStocker = "hidden";
   $showUsername = "hidden";
   $username = "";
   $password = "";
@@ -44,8 +45,15 @@
   }
 
   $_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
-  if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
-    $showSwitch = "show";
+
+  if (isset($_SESSION['role'])) {
+    if ($_SESSION['role'] == 'admin') {
+     $showAdmin = "show"; 
+     $showStocker = "hidden";
+    }else if ($_SESSION['role'] == 'stocker') {
+      $showAdmin = "hidden"; 
+      $showStocker = "show";
+    }
   }
 
   if (isset($_POST['dangnhap'])) {
@@ -177,7 +185,8 @@
             <li class="<?php if (isset($_SESSION['page']) && $_SESSION['page'] == 'product' ) {
               echo "active"; } ?>"><a href="product.php">SẢN PHẨM </a></li>
             <li><a href="#">LIÊN HỆ </span></a></li>
-            <li class="<?php echo $showSwitch; ?>"><a href="administrator.php"><i class="fa fa-hand-o-right"></i> ĐẾN ADMIN </span></a></li>
+            <li class="<?php echo $showAdmin; ?>"><a href="administrator.php"><i class="fa fa-hand-o-right"></i> ĐẾN ADMIN </span></a></li>
+            <li class="<?php echo $showStocker; ?>"><a href="stocker.php"><i class="fa fa-hand-o-right"></i> ĐẾN STOCKER </span></a></li>
             <li>
             <form method="post" class="navbar-form">
               <div class="input-group search-box">

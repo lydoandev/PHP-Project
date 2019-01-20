@@ -271,13 +271,11 @@
 					$sql1 = "INSERT INTO products (prod_id, prod_name, material, image, price_in, price_out, date_add, quantity, description, cate_id, views, status)
 					VALUES ('$prod_id', '$prod_name', '$material', '$image', '$price_in', '$price_out', NOW(), '$quantity', '$description', '$cate_id', '$views',1)";
 					$sql2 = "INSERT INTO promotion VALUES ('$prod_id', '$new_price', '$date_start', '$date_end')";
-					if ($connect->query($sql1)) {
-						if ($connect->query($sql2)) {
+					if ($connect->query($sql1) and $connect->query($sql2)) {
 						echo "<script> 
-							alert('Thêm Sản Phẩm Thành Công');
-							window.location.replace('..$url');
-						</script>";
-						}else echo "<script> alert('Đã xảy ra lỗi');</script>";
+										alert('Thêm Sản Phẩm Thành Công');
+										window.location.replace('stocker.php?cate_id=".$cate_id."&viewProd_id=".$prod_id."#views');
+									</script>";
 					}else echo "<script> alert('Đã xảy ra lỗi');</script>";
 				}else echo "<script> alert('ID Sản Phẩm Đã Tồn Tại');</script>";
 				
@@ -816,7 +814,7 @@
 			    	echo "
 			    		
 			    		<tr>
-				        <td> <img src='$image[0]' width = '150px'>". $info['prod_name'] . "</td>
+				        <td> <img src='$image[0]' width = '150px'> &nbsp;". $info['prod_name'] . "</td>
 				        <td> <s class = '$show'>" . number_format($info['price_out'])." đ</s>". number_format($info['new_price']). "đ</td>
 				        <td>". $row['quantity'] . "</td>
 				        <td>" . number_format($info['new_price']* $row['quantity']). "</td>
@@ -835,23 +833,59 @@
 			$result = $connect->query($sql);
 			if ($result->num_rows > 0) {
 				while($row = $result->fetch_assoc()) {
+					if ($row['ship_date'] == "") {
+						$ship_date = " 2 - 3 ngày sau";
+					}else $ship_date = $row['ship_date'];
 					showProductInOrder($connect, $row['order_id']);
 
 					$total = totalPriceInOrder($connect, $row['order_id']);
 					echo "
-					<div class= 'col-xs-6'>
+					<div class= 'col-xs-4'>
+					Ngày Đặt Hàng: ".$row['order_date']. "
 					</div>
-					<div class= 'col-xs-3' style= 'color: red'>
-						Ngày Giao: ".$row['ship_date']. "
+					<div class= 'col-xs-4' style= 'color: red'>
+						Ngày Giao: $ship_date
 					</div>
-					<div class= 'col-xs-3'>
+					<div class= 'col-xs-4'>
 						TỔNG TIỀN: ".number_format($total)."
 					</div>
+					<hr style = 'border: 1px solid #333333'>
 				";
 				}
 			}else echo "
 					<div class = 'solugan' style='margin-top: 100px;'>
 					<h3>HIỆN TẠI CHƯA CÓ BẤT KÌ ĐƠN HÀNG NÀO</h3>
+					</div>
+				";
+		}
+	}
+
+	function showOrderCancel($connect, $username){
+		if ($connect) {
+			$sql = "SELECT * FROM orders WHERE username = '$username' AND status = -1";
+			$result = $connect->query($sql);
+			if ($result->num_rows > 0) {
+				while($row = $result->fetch_assoc()) {
+
+					showProductInOrder($connect, $row['order_id']);
+
+					$total = totalPriceInOrder($connect, $row['order_id']);
+					echo "
+					<div class= 'col-xs-4'>
+					Ngày Đặt Hàng: ".$row['order_date']. "
+					</div>
+					<div class= 'col-xs-4' style= 'color: red'>
+						Ngày hủy: ".$row['delete_date']."
+					</div>
+					<div class= 'col-xs-4'>
+						TỔNG TIỀN: ".number_format($total)."
+					</div>
+					<hr style = 'border: 1px solid #333333'>
+				";
+				}
+			}else echo "
+					<div class = 'solugan' style='margin-top: 100px;'>
+					<h3> HIỆN TẠI CHƯA CÓ BẤT KÌ ĐƠN HÀNG NÀO BỊ HỦY </h3>
 					</div>
 				";
 		}
@@ -870,13 +904,10 @@
 					$connect->query($sql);
 				}
 			}
-			$sql = "DELETE FROM ords_prods WHERE order_id = $order_id";
+			$sql= " UPDATE orders SET status = -1, delete_date = NOW(), ship_date = NULL WHERE order_id = $order_id";
 			if ($connect->query($sql)) {
-				$sql= " DELETE FROM orders WHERE order_id = $order_id";
-				if ($connect->query($sql)) {
-					echo "<script> alert('Hủy đơn hàng thành công');</script>";
-				}else echo "<script> alert('Chưa hủy được');</script>";
-			}
+				echo "<script> alert('Hủy đơn hàng thành công');</script>";
+			}else echo "<script> alert('Chưa hủy được');</script>";
 		}
 	}
 
@@ -906,7 +937,7 @@
 							<a type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteUrl. "')\" ><i class = 'fa fa-trash-o fa-2x' style='color: red;'></i></a>
 						</div>
 						
-						<hr style = 'border: 1px solid #333333'>;
+						<hr style = 'border: 1px solid #333333'>
 					";
 				}
 			}else echo "

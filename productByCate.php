@@ -3,6 +3,11 @@
 	session_start();
 	include "function.php";
 	$_SESSION['page'] = "productByCate";
+	
+	if (isset($_GET['cate_id'])) {
+		$_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
+		$cate_id = $_GET['cate_id'];
+	}
 	if (isset($_GET['addProd_id'])) {
 		if (!isset($_SESSION['username'])) {
 			echo "
@@ -11,12 +16,8 @@
 			 window.location.replace('./home.php');
 			</script>";
 		}else{
-			$_SESSION['last_url'] = "productByCate.php";
 			addToCart($connect, $_SESSION['username'], $_GET['addProd_id'], 1);
 		}
-	}
-	if (isset($_GET['cate_id'])) {
-		$cate_id = $_GET['cate_id'];
 	}
    ?>
 <!DOCTYPE html>
