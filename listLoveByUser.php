@@ -2,12 +2,8 @@
 <?php
 	session_start();
 	include "function.php";
-	$_SESSION['page'] = "productByCate";
-	
-	if (isset($_GET['cate_id'])) {
-		$_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
-		$cate_id = $_GET['cate_id'];
-	}
+	$_SESSION['page'] = "listLoveByUser";
+	$_SESSION['last_url'] = $_SERVER['REQUEST_URI'];
 	if (isset($_GET['addProd_id'])) {
 		if (!isset($_SESSION['username'])) {
 			echo "
@@ -16,9 +12,11 @@
 			 window.location.replace('./home.php');
 			</script>";
 		}else{
+			$_SESSION['last_url'] = "listLoveByUser.php";
 			addToCart($connect, $_SESSION['username'], $_GET['addProd_id'], 1);
 		}
 	}
+	
 	if (isset($_GET['likeProd_id'])) {
 		if (!isset($_SESSION['username'])){
 			echo "
@@ -27,6 +25,7 @@
 			 window.location.replace('./home.php');
 			</script>";
 		}else{
+			$_SESSION['last_url'] = "listLoveByUser.php";
 			insertToListProductLove($connect, $_SESSION['username'], $_GET['likeProd_id']);
 		}
 	}
@@ -53,37 +52,13 @@
 	 ?>
 	 
 	<div class="content"> 
-	  <div id="myCarousel" class="carousel slide" data-ride="carousel">
-	    <!-- Indicators -->
-	    <ol class="carousel-indicators">
-	      <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-	      <li data-target="#myCarousel" data-slide-to="1"></li>
-	      <li data-target="#myCarousel" data-slide-to="2"></li>
-	      <li data-target="#myCarousel" data-slide-to="3"></li>
-	    </ol>
-
-	    <!-- Wrapper for slides -->
-	    <div class="carousel-inner">
-	      <?php showSlide($connect); ?>
-	    </div>
-
-	    <!-- Left and right controls -->
-	    <a class="left carousel-control" href="#myCarousel" data-slide="prev">
-	      <span class="glyphicon glyphicon-chevron-left"></span>
-	      <span class="sr-only">Previous</span>
-	    </a>
-	    <a class="right carousel-control" href="#myCarousel" data-slide="next">
-	      <span class="glyphicon glyphicon-chevron-right"></span>
-	      <span class="sr-only">Next</span>
-	    </a>
-		</div>
 		<div class="container">
 			<div class="productHot">
 				<div class="row">
 					<div class="solugan">
 						<div class="box-product-head">
-							<span class="box-title text-uppercase">
-								<?php echo $_GET['cate_name']; ?>
+							<span class="box-title">
+								DANH SÁCH YÊU THÍCH CỦA BẠN
 							</span>
 							<span class="af-ter">
 								
@@ -91,20 +66,11 @@
 						</div>
 					</div>
 					<?php  
-						$sql = "SELECT * FROM products, categories WHERE products.cate_id = categories.cate_id AND categories.cate_id = '$cate_id' AND products.delete_at IS NULL;";
-						$result = $connect->query($sql);
-						if ($result->num_rows > 0) {
-							while($row = $result->fetch_assoc()) {
-								$prod = new product();
-								$info = $prod->showProduct($connect, $row['prod_id']);
-								$image = explode("|", $info['image']);
-								$prod->showInfoProducthtml($row['prod_id'], $info['prod_name'], $image[0], $info['price_out'], $info['new_price']);
-							}
-						}
+						$prod = new product();
+						$prod->showListLoveByUser($connect, $_SESSION['username']);
 					?>
 				</div>
 			</div>
-
 			<div class="productPromotion">
 				<div class="row">
 					<div class="solugan">
@@ -123,8 +89,6 @@
 					?>
 				</div>
 			</div>
-
-			
 		</div>
 		
 		

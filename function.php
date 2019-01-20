@@ -110,6 +110,17 @@
 			}
 		}
 
+		function sumLoveProduct($connect, $username){
+
+			$sql = "SELECT count(prod_id) AS total FROM listProductLove WHERE username = '$username'";
+			$result = $connect->query($sql);
+			if ($result->num_rows > 0) {
+				$row = $result->fetch_assoc();
+				return $row['total'];
+			}
+
+		}
+
 		function check_login($connect, $username, $password){
 			
 	    $sql = "SELECT * FROM users WHERE username = '" . $username . "' LIMIT 1";
@@ -190,6 +201,7 @@
 			}
 		}
 
+		
 		function updatePassword($connect, $username, $oldPassword, $newPassword){
 			if ($connect) {
 				$err = "";
@@ -213,6 +225,41 @@
 
 	}
 
+	function insertToListProductLove($connect, $username, $prod_id){
+			if ($connect) {
+				$url = $_SESSION['last_url'];
+				if (checkLoveByUser($username, $prod_id)) {
+					$sql = "DELETE FROM listProductLove WHERE username = '$username' AND prod_id = '$prod_id'";
+					if ($connect->query($sql)) {
+						echo "<script>
+						 alert('Xóa khỏi danh sách yêu thích thành công');
+						 window.location.replace('$url');
+						</script>";
+					}else echo "Lỗi 1";
+				}else {
+					$sql = "INSERT INTO listProductLove
+									VALUES ('$username', '$prod_id');";
+					if ($connect->query($sql)) {
+						echo "<script>
+						 alert('Thêm vào danh sách yêu thích thành công');
+						 window.location.replace('$url');
+						</script>";
+					}else echo "Lỗi 2";
+				}
+			}
+		}
+
+	function checkLoveByUser($username, $prod_id){
+		GLOBAL $connect;
+		$sql = "SELECT * FROM listProductLove WHERE username = '$username' AND prod_id = '$prod_id'";
+		$result = $connect->query($sql);
+		if ($result->num_rows > 0) {
+			return 1;
+		}else return 0;
+	}
+
+
+
 	/**
 	 * 
 	 */
@@ -231,7 +278,31 @@
 			}
 		}
 
+
+	 	function showListLoveByUser($connect, $username){
+	 		if ($connect) {
+	 			$sql = "SELECT * FROM products, listProductLove WHERE products.prod_id = listProductLove.prod_id AND username = '$username'";
+					$result = $connect->query($sql);
+					if ($result->num_rows > 0) {
+						while($row = $result->fetch_assoc()) {
+								$info = $this->showProduct($connect, $row['prod_id']);
+								$image = explode("|", $info['image']);
+								$this->showInfoProducthtml($row['prod_id'], $info['prod_name'], $image[0], $info['price_out'], $info['new_price']);
+						}
+					}
+	 		}
+	 	}
+
 		
+		function countLoves($prod_id){
+			GLOBAL $connect;
+			$sql = "SELECT count(prod_id) AS total FROM listProductLove WHERE prod_id = '$prod_id'";
+			$result = $connect->query($sql);
+			if ($result->num_rows > 0) {
+				$row = $result->fetch_assoc();
+				return $row['total'];
+			}
+		}
 
 		function changeViews($connect, $prod_id){
 			if ($connect) {
@@ -308,6 +379,10 @@
 				$percent = round(($price - $new_price)/($price/100), 0);
 				$show = "show";
 			}
+			if (checkLoveByUser($_SESSION['username'], $prod_id)) {
+				$color = '#ff3399';
+			}else $color = '#fff';
+			$loves = $this->countLoves($prod_id);
 			echo "
 				<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6'>
 					<div class='product-item'>
@@ -319,10 +394,10 @@
 							GIẢM
 						</div>
 						<div class='product-control text-center'>
-							<button class='btn'>
+							<button class='btn btn-addCart'>
 								<a href='$page.php?addProd_id=" . $prod_id . "'><i class = 'fa fa-cart-plus fa-lg' style='color: #FFF;'></i> Giỏ hàng
 							</button>
-							<button class='btn'>
+							<button class='btn btn-addCart'>
 								<a href='productDetail.php?prod_id=" . $prod_id . "'><i class = 'fa fa-eye' style='color: #FFF;'></i></a>
 							</button>
 						</div>
@@ -330,6 +405,13 @@
 						<div class='caption text-center'>
 							<div class='col-xs-12 prod_name'>
 							<h4 class = 'text-uppercase'>$name</h4>
+							</div>
+
+							<div class='col-xs-12 pull-left'>
+								<button class='btn-love btn'>
+								<span>$loves</span>
+									<a href='$page.php?likeProd_id=" . $prod_id . "'><i class = 'fa fa-heart' style='color: $color;'></i></a>
+								</button>
 							</div>
 							<div class='col-xs-6'>
 							<span class='price float-left'>".number_format($new_price)."đ</span>
@@ -507,91 +589,7 @@
 		}
 	}
 
-	function showCart($connect, $username){
-		if ($connect) {
-			$sql = "SELECT orders.order_id, prod_id, quantity FROM ords_prods, orders WHERE ords_prods.order_id = orders.order_id AND username = '$username' AND orders.status = 0";
-			$result = $connect->query($sql);
-			$user = new user();
-			$infoUser = $user->showInfo($connect, $username);
-			$order_id = getOrderIDNotYetOrder($connect, $username);
-			if ($result->num_rows > 0) {
-				$_SESSION['order_id'] = $order_id;
-			  $_SESSION['ajaxs'] = [];
-				
-				$total = totalPriceInOrder($connect, getOrderIDNotYetOrder($connect, $username));
-				echo "<table class='table'>
-							    <thead style='background: #c299ff'>
-							      <tr class = 'text-center'>
-							        <th><input type='checkbox'></th>
-							        <th>Sản Phẩm</th>
-							        <th>Đơn Giá</th>
-							        <th>Số Lượng</th>
-							        <th>Số Tiền</th>
-							        <th>Thao tác</th>
-							      </tr>
-							    </thead>
-							    <tbody>";
-			    while($row = $result->fetch_assoc()) {
-						array_push($_SESSION['ajaxs'], $row['prod_id']);
-			    	$prod_id = $row['prod_id'];
-			    	$prod = new product();
-			    	$info = $prod->showproduct($connect, $row['prod_id']);
-			    	$image = explode("|", $info['image']);
-			    	if ($info['new_price'] == "") {
-					 		$show = "hidden";
-					 		$percent = 0;
-					 		$info['new_price'] = $info['price_out'];
-					 	}else $show = "show";
-					 $deleteurl = "cart.php?deleteProd_id=$prod_id&deleteOrder_id=".$row['order_id'];
-			    	echo "
-			    		
-		             	<form method = 'GET' action='' name = 'form'>
-			    		<tr>
-			    			<td> <input type='checkbox' value = '".$row['prod_id'] ."'> </td>
-				        <td> <img src='$image[0]' width = '150px'>". $info['prod_name'] . "</td>
-				        <td id='price".$row['prod_id']."'> <s class = '$show'>" . number_format($info['price_out'])." đ</s>". number_format($info['new_price']). "đ</td>
-				        <td>
-		             	<button type='button' id='minus" . $row['prod_id'] . "'class='btn minus'>-</button>&nbsp;
-		             		<input id='".$row['prod_id']."' type='text' name='quantity' style='width:50px;' value='".$row['quantity']."'>
-		             	<button type='button' id='plus" . $row['prod_id'] . "'class='btn plus' id='plus'>+</button> 
-		             	</td>
-				        <td id='total".$row['prod_id']."'>" . number_format($info['new_price']* $row['quantity']). "</td>
-				        <td class = 'text-center'>
-									<a type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteurl. "')\"><i class = 'fa fa-trash-o' style='color: red;'></i></a>
-				        </td>
-				      </tr>
-				     </form>
-			    	";
-			    }
-			    echo "</tbody>
-							  </table>";
-					if ($total=="") {
-						echo "<h3>CHƯA CÓ SẢN PHẨM TRONG GIỎ HÀNG</h3>";
-					}else{
-						echo "<div class='col-xs-5'>
-									
-							 	</div>
-							 <div class='col-xs-7 float-right' id='totalPrice'>
-							 	<form method='POST' action=''>
-							 	<div id='address' class='col-sm-12' style = 'margin-bottom: 30px;'>
-			           	Địa chỉ giao hàng:
-			             <input type='text' name='address' class='form-control' placeholder='Địa chỉ giao hàng' value = '".$infoUser['address']."'>
-			           </div>
-							 		<b>TỔNG TIỀN: </b>". number_format($total)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							 		<button class = 'btn' type = 'submit' name='order'>ĐẶT HÀNG</button>
-							 	</form>
-							 </div>
-							 ";
-					}
-					
-			} else {
-			    echo "<div class = 'solugan'>
-			    <h3 style='color:red;'>CHƯA CÓ SẢN PHẨM TRONG GIỎ HÀNG</h3>
-			    </div>
-			    ";
-			}
-		}
-	}	
+	
 
 	function order($connect, $username, $order_address, $prod_id, $quantity){
 		if ($connect) {
@@ -1061,6 +1059,98 @@
 		}
 	}
 
+	function showCart($connect, $username){
+		if ($connect) {
+			$sql = "SELECT orders.order_id, prod_id, quantity FROM ords_prods, orders WHERE ords_prods.order_id = orders.order_id AND username = '$username' AND orders.status = 0";
+			$result = $connect->query($sql);
+			$user = new user();
+			$infoUser = $user->showInfo($connect, $username);
+			$order_id = getOrderIDNotYetOrder($connect, $username);
+			if ($result->num_rows > 0) {
+				$_SESSION['order_id'] = $order_id;
+			  $_SESSION['ajaxs'] = [];
+				
+				$total = totalPriceInOrder($connect, getOrderIDNotYetOrder($connect, $username));
+				echo "<div id='table'>
+					<table class='table'>
+							    <thead style='background: #c299ff'>
+							      <tr class='text-center'>
+							        <th><input type='checkbox'></th>
+							        <th>Sản Phẩm</th>
+							        <th>Đơn Giá</th>
+							        <th>Số Lượng</th>
+							        <th>Số Tiền</th>
+							        <th>Thao tác</th>
+							      </tr>
+							    </thead>
+							    <tbody>";
+			    while($row = $result->fetch_assoc()) {
+						array_push($_SESSION['ajaxs'], $row['prod_id']);
+			    	$prod_id = $row['prod_id'];
+			    	$prod = new product();
+			    	$info = $prod->showproduct($connect, $row['prod_id']);
+			    	$image = explode("|", $info['image']);
+			    	if ($info['new_price'] == "") {
+					 		$show = "hidden";
+					 		$percent = 0;
+					 		$info['new_price'] = $info['price_out'];
+					 	}else $show = "show";
+					 	if ($info['quantity'] < $row['quantity']) {
+					 		$err = "* Số lượng không đủ";
+					 	}else $err = "";
+					 $deleteurl = "cart.php?deleteProd_id=$prod_id&deleteOrder_id=".$row['order_id'];
+			    	echo "
+			    		
+		             	<form method = 'GET' action='' name = 'form'>
+			    		<tr>
+			    			<td> <input type='checkbox' value = '".$row['prod_id'] ."'> </td>
+				        <td> <img src='$image[0]' width = '150px'>". $info['prod_name'] . "</td>
+				        <td id='price".$row['prod_id']."'> <s class = '$show'>" . number_format($info['price_out'])." đ</s>". number_format($info['new_price']). "đ</td>
+				        <td>
+		             	<button type='button' id='minus" . $row['prod_id'] . "'class='btn minus'>-</button>&nbsp;
+		             		<input id='".$row['prod_id']."' type='text' name='quantity' style='width:50px;' value='".$row['quantity']."'>
+		             	<button type='button' id='plus" . $row['prod_id'] . "'class='btn plus' id='plus'>+</button>
+		             	<span id='error".$row['prod_id']."' style='color:red;'>$err</span> 
+		            </td>
+				        <td id='total".$row['prod_id']."'>" . number_format($info['new_price']* $row['quantity']). "</td>
+				        <td class = 'text-center'>
+									<a type=\"button\" name=\"delete\" value=\"Delete\" onClick=\"confirmDelete('" .$deleteurl. "')\"><i class = 'fa fa-trash-o' style='color: red;'></i></a>
+				        </td>
+				      </tr>
+				     </form>
+			    	";
+			    }
+			    echo "</tbody>
+							  </table>
+							  </div>";
+					if ($total=="") {
+						echo "<h3>CHƯA CÓ SẢN PHẨM TRONG GIỎ HÀNG</h3>";
+					}else{
+						echo "<div class='col-xs-5'>
+									
+							 	</div>
+							 <div class='col-xs-7 float-right' id='totalPrice'>
+							 	<form method='POST' action=''>
+							 	<div id='address' class='col-sm-12' style = 'margin-bottom: 30px;'>
+			           	Địa chỉ giao hàng:
+			             <input type='text' name='address' class='form-control' placeholder='Địa chỉ giao hàng' value = '".$infoUser['address']."'>
+			           </div>
+							 		<b>TỔNG TIỀN: </b>". number_format($total)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							 		<button class = 'btn' type = 'submit' name='order'>ĐẶT HÀNG</button>
+							 	</form>
+							 </div>
+							 ";
+					}
+					
+			} else {
+			    echo "<div class = 'solugan'>
+			    <h3 style='color:red;'>CHƯA CÓ SẢN PHẨM TRONG GIỎ HÀNG</h3>
+			    </div>
+			    ";
+			}
+		}
+	}	
+
 	function changeQuantityControl($order_id, $id) {
 	   echo "
 	     <script type='text/javascript'>
@@ -1074,7 +1164,8 @@
 	               
 			          }else {
 			          	document.getElementById('" . $id . "').value--;
-		              $('#total" . $id . "').load('cart.php #total" . $id . "');
+		             $('#total".$id."').load('cart.php #total".$id."');
+		             $('#error".$id."').load('cart.php #error".$id."');
 			            $('#totalPrice').load('cart.php #totalPrice');
 		              $('#header-right').load('cart.php #header-right');
 			          }
@@ -1088,8 +1179,9 @@
 	           dataType: 'html',
 	           success: function(){
 	             document.getElementById('" . $id . "').value++;
-	             $('#total" . $id . "').load('cart.php #total" . $id . "');
+	             $('#total".$id."').load('cart.php #total".$id."');
 	             $('#totalPrice').load('cart.php #totalPrice');
+	             $('#error".$id."').load('cart.php #error".$id."');
 	             $('#header-right').load('cart.php #header-right');
 		          }
 	         });
@@ -1113,6 +1205,24 @@
 	    showCart($connect, $_SESSION['username']);
 	  }
  	}
+
+ 	function checkQuantityBeforeOrder($connect, $order_id){
+ 		$sql = "SELECT prod_id FROM ords_prods WHERE order_id = $order_id";
+		$result = $connect->query($sql);
+ 		if ($result->num_rows > 0) {
+				while($row = $result->fetch_assoc()) {
+					$prod = new product();
+					$info = $prod->showProduct($connect, $row['prod_id']);
+					$updateQuantity = $info['quantity'] - getQuantityProductInOrder($connect, $order_id, $row['prod_id']);
+					if ($updateQuantity < 0 ) {
+						return 0;
+					}
+				}
+			return 1;
+		}
+
+ 	}
+
  	function searchProductCate($connect, $cate_id, $price, $prod_name){
  		if ($connect) {
  			if ($price == "0") {
@@ -1144,4 +1254,5 @@
 					";
  		}
  	}
+
 ?>	

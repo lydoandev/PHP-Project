@@ -15,6 +15,19 @@
 			addToCart($connect, $_SESSION['username'], $_GET['addProd_id'], 1);
 		}
 	}
+	
+	if (isset($_GET['likeProd_id'])) {
+		if (!isset($_SESSION['username'])){
+			echo "
+			<script>
+			 alert('Vui Lòng Đăng Nhập');
+			 window.location.replace('./home.php');
+			</script>";
+		}else{
+			$_SESSION['last_url'] = "product.php";
+			insertToListProductLove($connect, $_SESSION['username'], $_GET['likeProd_id']);
+		}
+	}
    ?>
 <!DOCTYPE html>
 <html>

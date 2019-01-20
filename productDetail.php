@@ -44,6 +44,24 @@
 		}
 	}
 
+	if (isset($_GET['likeProd_id'])) {
+		if (!isset($_SESSION['username'])){
+			echo "
+			<script>
+			 alert('Vui Lòng Đăng Nhập');
+			 window.location.replace('./home.php');
+			</script>";
+		}else{
+			insertToListProductLove($connect, $_SESSION['username'], $_GET['likeProd_id']);
+		}
+	}
+
+	if (checkLoveByUser($_SESSION['username'], $_GET['prod_id'])) {
+		$color = '#ff3399';
+	}else $color = '#fff';
+	$prod = new product();
+	$loves = $prod->countLoves($_GET['prod_id']);
+
 	if (isset($_SESSION['username'])) {
 			$user = new user();
 	 		$infoUser = $user->showInfo($connect, $_SESSION['username']); 
@@ -58,6 +76,17 @@
 				</script>";
 		} else {
 			order($connect, $_SESSION['username'], $_POST['address'], $_GET['prod_id'], $_POST['quantity']);
+		}
+	}
+	if (isset($_POST['love'])) {
+		if (!isset($_SESSION['username'])){
+			echo "
+			<script>
+			 alert('Vui Lòng Đăng Nhập');
+			 window.location.replace('./home.php');
+			</script>";
+		}else{
+			insertToListProductLove($connect, $_SESSION['username'], $_GET['prod_id']);
 		}
 	}
 ?>
@@ -178,12 +207,16 @@
 			           </div>
 			           <hr>
 			           <div class="col-sm-3">
+			           	<button class="btn">Thêm vào giỏ</button>
 			           </div>
 			           <div class="col-sm-3">
 			             <button class="btn btn-info text-uppercase" name="addCart">Thêm vào giỏ</button>
 			           </div>
 			           <div class="col-sm-3">
-			             <button class="btn btn-info text-uppercase" name="order">Mua ngay</button>
+			             <button class='btn-love btn' name = 'love'>
+										<a href=''><i class = 'fa fa-heart' style='color: <?php echo $color ?>;'></i></a>
+									</button>
+									Đã thích(<?php echo $loves; ?>)
 			           </div>
 							</div>
 						</div>

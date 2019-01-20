@@ -9,6 +9,8 @@ CREATE TABLE slides(
     img_url VARCHAR(255)
 );
 
+
+
 INSERT INTO slides(img_url)
 VALUES
 	('Image/slider1.png'),
@@ -239,7 +241,29 @@ INSERT INTO `promotion`
         ('PD_09',605000,'2019-01-18','2019-01-21'),
         ('PD_10',1750000,'2019-01-18','2019-01-21');
 
-UPDATE users SET delete_at = CURDATE() WHERE username = 'trangtran';      
+UPDATE users SET delete_at = CURDATE() WHERE username = 'trangtran';    
+
+CREATE TABLE listProductLove(
+	username VARCHAR(50),
+    prod_id VARCHAR(10),
+	PRIMARY KEY(username, prod_id),
+	FOREIGN KEY (username) REFERENCES users (username),
+	FOREIGN KEY (prod_id) REFERENCES products (prod_id)
+);
+
+INSERT INTO listProductLove
+VALUES ('phantrung', 'PD_01'),
+('phantrung', 'PD_02'),
+('phantrung', 'PD_03'),
+	('nguyenmy', 'PD_01'),
+('nguyenmy', 'PD_02'),
+('nguyenmy', 'PD_03'),
+	('phantrung', 'PD_04'),
+('phantrung', 'PD_05'),
+('phantrung', 'PD_06'),
+	('nguyenmy', 'PD_07'),
+('nguyenmy', 'PD_08'),
+('nguyenmy', 'PD_09');  
         
 INSERT INTO `ords_prods`
  VALUES (1,'PD_01',1),

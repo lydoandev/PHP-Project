@@ -41,6 +41,8 @@
     $username = $_SESSION['username'];
     $avatar = $_SESSION['avatar_url'];
     $showUsername = "show";
+    $user = new user();
+    $_SESSION['loves'] = $user->sumLoveProduct($connect, $_SESSION['username']);
     $_SESSION['totalQuantity'] = getTotalQuantityInCartByUser($connect, $_SESSION['username']);
   }
 
@@ -98,11 +100,7 @@
             +84 648 534 343
           </span>
         </div>
-      </div>
-      <div class="col-lg-2 col-md-1 col-sm-0 col-xs-0">
-        
-      </div>
-      <div class="header-right col-lg-5 col-md-6 col-sm-6 col-xs-6">
+      </div>      <div class="header-right col-lg-6 col-md-6 col-sm-6 col-xs-6">
         <ul class="nav navbar-nav" id="header-right">
           <li>
             <a href="" data-toggle="modal" data-target="#dangki"><span><i class="fa fa-bell-o "></i></span> THÔNG BÁO </a>
@@ -128,7 +126,8 @@
               </span> ĐĂNG NHẬP
             </a>
           </li>
-          <li><a href="cart.php"><span><i class="fa fa-shopping-cart fa-2x <?php echo $showUsername;?>"><sup><?php echo $_SESSION['totalQuantity']; ?></sup></i></span></a></li>
+          <li><a href="cart.php"><span><i class="fa fa-shopping-cart fa-2x <?php echo $showUsername;?>" style = "color: #ff6600;"><sup><?php echo $_SESSION['totalQuantity']; ?></sup></i></span></a></li>
+          <li><a href="listLovebyUser.php"><span><i class="fa fa-heart fa-2x <?php echo $showUsername;?>" style = "color: red;"><sup><?php echo $_SESSION['loves']; ?></sup></i></span></a></li>
           <li class="dropdown" class="<?php echo $showUsername;?>">
               <a href="#" id="user" class="<?php echo $showUsername;?> ?>" data-toggle="dropdown">
                 <img class="img-circle" width="15" height="15" src="<?php echo $_SESSION['avatar_url']; ?>">

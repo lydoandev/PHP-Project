@@ -17,7 +17,8 @@
 	if (isset($_POST['order'])) {
 		$address = $_POST['address'];
 		$order_id = getOrderIDNotYetOrder($connect, $_SESSION['username']);
-		$sql = "SELECT prod_id FROM ords_prods WHERE order_id = $order_id";
+		if (checkQuantityBeforeOrder($connect, $order_id)) {
+			$sql = "SELECT prod_id FROM ords_prods WHERE order_id = $order_id";
 			$result = $connect->query($sql);
 			if ($result->num_rows > 0) {
 				while($row = $result->fetch_assoc()) {
@@ -38,6 +39,8 @@
 					 alert('Có lỗi');
 					</script>";
 			}
+		}else echo "<script> alert('Số lượng sản phẩm không đủ');</script>";
+		
 		
 	}
 ?>

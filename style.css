@@ -1,3 +1,12 @@
+  .product-item .btn-love{
+    display: block;
+    margin-bottom: 18px;
+  }
+
+  .product-item .btn-love a{
+    color: #ff3399;
+  }
+
   .header-menu .navbar-nav>li.active>a,
   .header-menu .navbar-nav>li.active>a:focus,
   .header-menu .navbar-nav>li.active>a:hover {
@@ -198,7 +207,7 @@
     border: 1px solid #66c2ff;
     border-radius: 10px;
     padding: 5px 5px 5px 5px;
-    height: 310px;
+    height: 360px;
     margin-top: 30px;
   }
   .product-item .promotion{
@@ -214,7 +223,7 @@
     border: 1px solid #c51a1d;
   }
 
-  .product-item:hover .btn {
+  .product-item:hover .btn-addCart{
     display: inline-block;
     background: #2b2c31;
     color: #FFFFFF;
@@ -225,7 +234,7 @@
     margin-top: -45px;
   }
 
-  .product-control .btn {
+  .product-control .btn-addCart{
     background: #2b2c31;
     color: #FFFFFF;
     display: none;

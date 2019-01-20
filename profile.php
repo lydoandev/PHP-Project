@@ -73,7 +73,7 @@
 	          </ul>
 					</li>
 					<li><a href="#order" data-toggle="tab" aria-expanded="true"><span><i class="fa fa-list-alt" style="color: #3399ff;"></i></span> Đơn hàng</a></li>
-					<li><a href="#" data-toggle="tab" aria-expanded="true"><span><i class="fa fa-bell-o" style="color: #ff0000;"></i></span> Thông báo</a></li>
+					<li><a href="#" data-toggle="tab" aria-expanded="true"><span><i class="fa fa-bell-o" style="color: red;"></i></span> Thông Báo</a></li>
 				</ul>
 			</div>
 			<div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
